@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Api
 from embed import Embedding
-import config
+from .. import config
 
 # Initialize the Flask app and API
 app = Flask(__name__)
