@@ -1,5 +1,9 @@
 
 
+mongo_service=27017
+database_api_port=8000
+
+
 minio_service=9000
 minio_console=9001
 storage_api_port=9002
@@ -17,4 +21,4 @@ embedding_api_port=5000
 llm_api_port=5001
 
 
-processor_api_port=5002
+processor_api_port=7000
