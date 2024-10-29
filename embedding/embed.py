@@ -18,9 +18,9 @@ class Embedding(Resource):
         content = data.get('content')
 
         if not content:
-            return jsonify({"error": "No content provided"}), 400
+            return {"error": "No content provided"}, 400
 
         vector = self.embed_model.embed_query(content)
 
-        return jsonify({"vector": vector}), 200
+        return {"vector": vector}, 200
 

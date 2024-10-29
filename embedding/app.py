@@ -8,7 +8,7 @@ app = Flask(__name__)
 api = Api(app)
 
 # Add the resource to the API
-api.add_resource(Embedding, '/get-vector')
+api.add_resource(Embedding, '/vectorize')
 
 # Run the app
 if __name__ == '__main__':
