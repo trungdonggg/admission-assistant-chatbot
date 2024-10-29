@@ -1,8 +1,12 @@
 from quart import request, jsonify, Response
 from langchain_google_genai import ChatGoogleGenerativeAI
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Initialize the ChatGoogleGenerativeAI model
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash",
+                             google_api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Define the prompt
 prompt = "Dùng dữ liệu tôi đưa để trả lời câu hỏi. Trả lời bằng Tiếng Việt."
@@ -18,7 +22,7 @@ async def generate_response():
     context = data.get('context')
 
     if not context:
-        return jsonify({"error": "No input provided"}), 400
+        return {"error": "No input provided"}, 400
 
     try:
         # Combine the prompt and user input
@@ -28,4 +32,4 @@ async def generate_response():
         return Response(generate_stream(full_prompt), content_type='text/plain')
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return {"error": str(e)}, 500
