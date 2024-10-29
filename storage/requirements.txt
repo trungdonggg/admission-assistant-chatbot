@@ -1,3 +1,0 @@
-minio
-flask
-flask_restful
