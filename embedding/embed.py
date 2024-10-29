@@ -9,7 +9,7 @@ class Embedding(Resource):
     def __init__(self):
         self.embed_model = HuggingFaceEmbeddings(
             model_name="sentence-transformers/all-MiniLM-L6-v2",
-            model_kwargs={"device": "gpu"},
+            model_kwargs={"device": "cpu"},
             encode_kwargs={"normalize_embeddings": True}
         )
 
