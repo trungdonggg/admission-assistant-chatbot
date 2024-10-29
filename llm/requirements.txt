@@ -1,0 +1,2 @@
+quart
+langchain_google_genai
