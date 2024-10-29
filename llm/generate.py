@@ -6,7 +6,7 @@ load_dotenv()
 
 # Initialize the ChatGoogleGenerativeAI model
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash",
-                             google_api_key=os.getenv("GOOGLE_API_KEY"))
+                             google_api_key=os.getenv("GOOGLE_AI_API_KEY"))
 
 # Define the prompt
 prompt = "Dùng dữ liệu tôi đưa để trả lời câu hỏi. Trả lời bằng Tiếng Việt."
