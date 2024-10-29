@@ -1,10 +1,8 @@
 from flask import request, jsonify
 from flask_restful import Resource
 from langchain_huggingface import HuggingFaceEmbeddings
-from sentence_transformers import SentenceTransformer
 
 modelname = "dangvantuan/vietnamese-embedding"
-
 
 class Embedding(Resource):
 

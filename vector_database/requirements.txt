@@ -1,5 +1,5 @@
 flask
-flask_restful
+flask-restful
 weaviate-client
 typing
 logging
