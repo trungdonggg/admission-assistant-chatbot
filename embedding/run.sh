@@ -10,7 +10,7 @@ pip install -r requirements.txt
 export FLASK_APP=app.py
 
 # Run the Flask app
-python app.py
+python3 app.py
 
 # Or if you want to run it in production mode:
 # flask run --host=0.0.0.0 --port=8000
