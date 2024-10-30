@@ -1,13 +1,9 @@
-from quart import Quart
+from aiohttp import web
 from llm.generate import generate_response
 import config
 
-# Initialize the Quart app
-app = Quart(__name__)
+app = web.Application()
+app.router.add_post('/generate', generate_response)
 
-# Define the route for text generation
-app.add_url_rule('/generate', view_func=generate_response, methods=['POST'])
-
-# Run the app
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=config.llm_api_port)
+    web.run_app(app, host='0.0.0.0', port=config.llm_api_port)
