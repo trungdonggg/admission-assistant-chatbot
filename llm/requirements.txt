@@ -1,6 +1,7 @@
 langchain-google-genai
 langchain-core
 python-dotenv
-Quart
 typing
 pydantic
+flask
+flask-restful
