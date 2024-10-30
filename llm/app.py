@@ -4,7 +4,7 @@ from llm.generator import Generator
 import config
 
 app = Quart(__name__)
-
+bot = Generator()
 
 @app.route('/generate', methods=['POST'])
 async def generate_response():
@@ -22,12 +22,13 @@ async def generate_response():
         input=query
     )
 
-    async def generate_stream():
-        bot = Generator()
-        async for chunk in bot.astream(prompt_components):
-            yield chunk
+    try:
+        response = await bot.ainvoke(prompt_components)
 
-    return Response(generate_stream(), content_type='text/plain')
+        return {"response": response}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=config.llm_api_port)

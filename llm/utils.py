@@ -13,7 +13,6 @@ async def _streaming_parse(chunks) -> AsyncIterator[str]:
     async for chunk in chunks:
         yield chunk.content
 
-
 def get_chatbot_prompt(): 
     system_prompt: str = """
             Your name is David, a friendly and helpful AI chatbot.
@@ -41,7 +40,6 @@ def get_model():
 
 def streaming_parser():
     return RunnableGenerator(_streaming_parse)
-
 
 
 

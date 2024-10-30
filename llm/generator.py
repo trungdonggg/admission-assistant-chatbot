@@ -10,3 +10,6 @@ class Generator:
     async def astream(self, prompt_components: ChatTemplate) -> AsyncGenerator[str, None]:
         async for word in self.generator.astream(prompt_components.model_dump()):
             yield word
+
+    async def ainvoke(self, prompt_components: ChatTemplate) -> str:
+        return await self.generator.ainvoke(prompt_components.model_dump())
