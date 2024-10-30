@@ -1,3 +1,6 @@
-aiohttp[speedups]
 langchain-google-genai
+langchain-core
 python-dotenv
+Quart
+typing
+pydantic
