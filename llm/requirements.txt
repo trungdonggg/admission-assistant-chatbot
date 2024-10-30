@@ -5,3 +5,4 @@ typing
 pydantic
 flask
 flask-restful
+asyncio

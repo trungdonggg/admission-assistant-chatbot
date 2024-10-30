@@ -7,14 +7,19 @@ from llm.chat_template import ChatTemplate
 
 class Generator:
     def __init__(self):
-        self.generator = get_chatbot_prompt() | get_model() | streaming_parser()
+        # self.generator = get_chatbot_prompt() | get_model() | streaming_parser()
+        self.generator = get_chatbot_prompt() | get_model()
 
-    async def astream(self, prompt_components: ChatTemplate) -> AsyncGenerator[str, None]:
-        async for word in self.generator.astream(prompt_components.model_dump()):
-            yield word
 
-    async def ainvoke(self, prompt_components: ChatTemplate) -> str:
+    # async def astream(self, prompt_components: ChatTemplate) -> AsyncGenerator[str, None]:
+    #     async for word in self.generator.astream(prompt_components.model_dump()):
+    #         yield word
+
+    async def ainvoke(self, prompt_components: ChatTemplate):
         return await self.generator.ainvoke(prompt_components.model_dump())
+    
+    def invoke(self, prompt_components: ChatTemplate):
+        return self.generator.invoke(prompt_components.model_dump())
 
 
 class GenerateResponse(Resource):
@@ -22,7 +27,8 @@ class GenerateResponse(Resource):
     def __init__(self):
         self.bot = Generator()
     async def post(self):
-        data = await request.get_json()
+        data = request.json
+
         query = data.get('query')
         history = data.get('history')
         context = data.get('context')
@@ -39,7 +45,7 @@ class GenerateResponse(Resource):
         try:
             response = await self.bot.ainvoke(prompt_components)
 
-            return {"response": response}, 200
+            return {"response": response.content}, 200
 
         except Exception as e:
             return {"error": str(e)}, 500
