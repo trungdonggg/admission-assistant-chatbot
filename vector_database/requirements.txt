@@ -1,5 +1,5 @@
-flask
-flask-restful
+fastapi
+pydantic
 weaviate-client
 typing
-logging
+uvicorn

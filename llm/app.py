@@ -1,12 +1,36 @@
-from flask import Flask
-from flask_restful import Api
-import config
-from llm.generator import GenerateResponse
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, Response
+from pydantic import BaseModel
+from llm.utils import *
+from llm.chat_template import ChatTemplate
+from llm.generator import Generator
 
-app = Flask(__name__)
-api = Api(app)
+class ChatRequest(BaseModel):
+    query: str
+    history: list = []
+    context: str = ""
 
-api.add_resource(GenerateResponse, '/generate')
+bot: Generator = None
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=config.llm_api_port)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global bot
+    bot = Generator()
+    yield
+
+app = FastAPI(lifespan=lifespan)
+
+@app.post("/generate")
+async def generate_response(request: ChatRequest):
+    
+    prompt_components = ChatTemplate(
+        history=request.history,
+        context=request.context,
+        input=request.query
+    )
+
+    try:
+        response = await bot.ainvoke(prompt_components)
+        return Response(content=response.content, status_code=200)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) 

@@ -1,7 +1,5 @@
-
-export PYTHONPATH=$HOME/ttu-chatbot
+export PYTHONPATH="$HOME/ttu-chatbot"
 
 pip install -r requirements.txt
 
-python3 app.py
-
+uvicorn app:app --reload --port 8081

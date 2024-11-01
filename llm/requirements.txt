@@ -3,6 +3,5 @@ langchain-core
 python-dotenv
 typing
 pydantic
-flask
-flask-restful
-asyncio
+fastapi
+uvicorn
