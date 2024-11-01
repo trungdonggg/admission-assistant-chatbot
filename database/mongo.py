@@ -28,12 +28,19 @@ class Documents(Resource):
         if document_name:
             document = documents.find_one({"name": document_name})
             if document:
+                document["_id"] = str(document["_id"])  # Convert ObjectId to string if needed
                 return {"document": document}, 200
             else:
                 return {"error": "Document not found"}, 404
         else:
-            all_documents = documents.find({}, {"_id": 0})
-            return {"documents": all_documents}, 200
+            all_documents = documents.find({})
+            document_list = []
+
+            for document in all_documents:
+                document["_id"] = str(document["_id"])  # Convert ObjectId to string if needed
+                document_list.append(document)
+                
+            return {"documents": document_list}, 200
 
     def post(self):
         data = request.json
@@ -47,7 +54,7 @@ class Documents(Resource):
             return {"error": "Document with this name already exists"}, 400
         
         documents.insert_one({"name": document_name, "tagname": document_tagname})
-        return {"message": "Document added successfully"}, 201
+        return {"message": "Document added successfully"}, 200
 
     def delete(self):
         document_name = request.args.get("name")
@@ -56,10 +63,14 @@ class Documents(Resource):
             return {"error": "Document name is required"}, 400
         
         result = documents.delete_one({"name": document_name})
+        
         if result.deleted_count == 0:
             return {"error": "Document not found"}, 404
         
-        return {"message": "Document deleted successfully"}, 200
+        return {"message": f"Document '{document_name}' deleted successfully"}, 200
+
+
+
 
 class ChatHistory(Resource):
     def get(self):
@@ -67,27 +78,25 @@ class ChatHistory(Resource):
         
         if not user:
             return {"error": "User is required"}, 400
+        
+        history = chat_history.find_one({"user": user})
+        history["_id"] = str(history["_id"])
+        
+        return {"history": history}, 200
 
-        history = chat_history.find_one({"user": user}, {"_id": 0, "history": 1})
-        if history:
-            return {"chat_history": history["history"]}, 200
-        else:
-            return {"error": "No chat history found for user"}, 404
 
     def post(self):
         data = request.json
         user = data.get("user")
-        user_message = data.get("message")
+        message = data.get("message")
         
-        if not user:
-            return {"error": "User is required"}, 400
-        if not user_message:
-            return {"error": "Message is required"}, 400
-        
+        if not user or not message:
+            return {"error": "User and message are required"}, 400
+
         chat_history.update_one(
             {"user": user},
-            {"$push": {"history": user_message}},
+            {"$push": {"history": message}},
             upsert=True
         )
         
-        return {"message": "Chat message saved successfully"}, 201
+        return {"message": "Chat message saved successfully"}, 200

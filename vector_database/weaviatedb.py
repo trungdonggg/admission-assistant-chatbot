@@ -101,11 +101,12 @@ class Weaviate():
         logging.info(f"Query found [{len(response.objects)}] result(s)")
 
         return response.objects
-    
 
 
 
-    
+
+
+
 class VectorDatabase(Resource):
 
     def __init__(self) -> None:
