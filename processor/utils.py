@@ -28,7 +28,7 @@ async def split_document(content: str, chunk_size: int = 100, chunk_overlap: int
         response = await client.post(url, headers=headers, json=payload)
         # response.raise_for_status()
 
-    return response
+    return response.get("chunks")
 
 async def add_document_name_and_tagname_to_db(request: models.AddDocumentRequestDatabase):
     

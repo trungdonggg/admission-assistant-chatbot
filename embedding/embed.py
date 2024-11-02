@@ -17,10 +17,11 @@ class Embedding(Resource):
         data = request.json
         content = data.get('content')
 
-        if not content:
-            return {"error": "No content provided"}, 400
+        if not content or not isinstance(content, list):
+            return {"error": "Content must be a list of strings"}, 400
 
-        vector = self.embed_model.embed_query(content)
-
-        return {"vector": vector}, 200
-
+        try:
+            vectors = [self.embed_model.embed_query(text) for text in content]
+            return {"vectors": vectors}, 200
+        except Exception as e:
+            return {"error": str(e)}, 500

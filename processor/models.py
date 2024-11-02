@@ -11,7 +11,7 @@ class AddChatHistoryRequestDatabase(BaseModel):
     message: List[str]
 
 class VectorizeRequest(BaseModel):
-    content: str
+    content: List[str]
 
 class CreateDocumentRequestVectorDatabase(BaseModel):
     document_name: str
