@@ -17,7 +17,7 @@ chat_history_schema = {
 documents = db["documents"]
 documents_schema = {
     "name":str,
-    "tagname": list[str]
+    "tagname": str
 }
 
 
@@ -73,7 +73,7 @@ class Documents(Resource):
 
 
 class ChatHistory(Resource):
-    def get(self):
+    async def get(self):
         user = request.args.get("user")
         
         if not user:

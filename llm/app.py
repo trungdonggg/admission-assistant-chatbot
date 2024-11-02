@@ -5,10 +5,6 @@ from llm.utils import *
 from llm.chat_template import ChatTemplate
 from llm.generator import Generator
 
-class ChatRequest(BaseModel):
-    query: str
-    history: list = []
-    context: str = ""
 
 bot: Generator = None
 
@@ -21,12 +17,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 @app.post("/generate")
-async def generate_response(request: ChatRequest):
+async def generate_response(request: ChatTemplate):
     
     prompt_components = ChatTemplate(
         history=request.history,
         context=request.context,
-        input=request.query
+        input=request.input
     )
 
     try:

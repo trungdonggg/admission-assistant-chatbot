@@ -1,0 +1,4 @@
+langchain-text-splitters
+fastapi
+pydantic
+typing

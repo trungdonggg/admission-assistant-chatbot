@@ -3,6 +3,6 @@ from typing import List
 
 
 class ChatTemplate(BaseModel):
-    history: List
-    context: str
+    history: List = []
+    context: str = ""
     input: str

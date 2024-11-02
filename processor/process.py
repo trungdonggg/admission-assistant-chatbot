@@ -1,24 +1,33 @@
+from processor.utils import *
+from processor.models import *
+
 
 class Processor:
     def __init__(self):
         pass
 
-    def add_document(self):
-        add_document_name_and_tagname_to_db()
-        vectorize()
-        add_to_vectordb()
+    async def add_document(self, request: AddDocument):
+        user = request.user
+        document_name = request.document_name
+        tag_name = request.tag_name
+        document_content = request.document_content
+        
+        await split_document()
+        await add_document_name_and_tagname_to_db()
+        await vectorize()
+        await add_document_to_vectordb()
 
 
-    def delete_document(self):
-        remove_document_name_from_db()
-        remove_from_vectordb()
+    async def delete_document(self):
+        await remove_document_from_db()
+        await remove_document_from_vectordb()
     
 
-    def search(self):
-        vectorize()
-        get_chat_history()
-        query_vectordb()
-        generate_by_llm()
-        add_chat_history()
+    async def search(self):
+        await vectorize()
+        await get_chat_history()
+        await query_vectordb()
+        await generate_by_llm()
+        await add_chat_history()
     
     
