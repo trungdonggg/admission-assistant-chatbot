@@ -24,22 +24,22 @@ class Processor:
             )
         )
 
-        # Vectorize the text chunks
-        vectors = await vectorize(
-            VectorizeRequest(
-                content=text_chunks
-            )
-        )
+        # # Vectorize the text chunks
+        # vectors = await vectorize(
+        #     VectorizeRequest(
+        #         content=text_chunks
+        #     )
+        # )
         
-        # Add the document with chunks and vectors to the vector database
-        await add_document_to_vectordb(
-            CreateDocumentRequestVectorDatabase(
-                document_name=document_name,
-                tag_name=tag_name,
-                chunks=text_chunks,
-                vectors=vectors
-            )
-        )
+        # # Add the document with chunks and vectors to the vector database
+        # await add_document_to_vectordb(
+        #     CreateDocumentRequestVectorDatabase(
+        #         document_name=document_name,
+        #         tag_name=tag_name,
+        #         chunks=text_chunks,
+        #         vectors=vectors
+        #     )
+        # )
 
     async def delete_document(self, document_name: str):
         # Remove the document from the database and vector database

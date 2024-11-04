@@ -1,12 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from processor.models import AddDocument, QueryRequestVectorDatabase
-from processor import Processor
+from processor.process import Processor
 
 app = FastAPI()
 processor = Processor()
 
 
-@app.post("/add_document")
+@app.post("/add-document")
 async def add_document(request: AddDocument):
     try:
         await processor.add_document(request)
@@ -15,7 +15,7 @@ async def add_document(request: AddDocument):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.delete("/delete_document/{document_name}")
+@app.delete("/delete-document/{document_name}")
 async def delete_document(document_name: str):
     try:
         await processor.delete_document(document_name)
