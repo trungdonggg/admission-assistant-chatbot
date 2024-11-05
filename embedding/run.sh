@@ -1,5 +1,5 @@
 
-export PYTHONPATH=$HOME/ttu-chatbot
+export PYTHONPATH=$(dirname "$(pwd -P)")
 
 pip install -r requirements.txt
 
