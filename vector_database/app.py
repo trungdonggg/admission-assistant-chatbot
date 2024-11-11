@@ -27,6 +27,10 @@ async def lifespan(app: FastAPI):
     global weaviate_db
     weaviate_db = WeaviateDB()
     await weaviate_db.connect()
+
+    # testing purpose, should be removed
+    await weaviate_db.delete_collection(config.weaviate_collection_name)
+
     collection = weaviate_db.get_collection(config.weaviate_collection_name)
     if not await collection.exists():
         await weaviate_db.create_collection(config.weaviate_collection_name)
@@ -62,6 +66,7 @@ async def add_document(req: QueryRequest):
         return {"query_results": response}, 200
     except Exception as e:
         return HTTPException(status_code=500, detail=str(e))
+
 
 # @app.get("/retriever", response_model=dict)
 # async def query_document(content: str, vector: List[float], limit: int = 10):

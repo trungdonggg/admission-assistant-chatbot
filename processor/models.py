@@ -8,7 +8,7 @@ class AddDocumentRequestDatabase(BaseModel):
 
 class AddChatHistoryRequestDatabase(BaseModel):
     user: str
-    message: List[str]
+    messages: List
 
 class VectorizeRequest(BaseModel):
     content: List[str]
@@ -19,7 +19,7 @@ class CreateDocumentRequestVectorDatabase(BaseModel):
     chunks: List[str]
     vectors: List[List[float]]
 
-class QueryRequestVectorDatabase(BaseModel):
+class QueryVectorDatabase(BaseModel):
     content: str        #query + history
     vector: List[float]
     limit: int
@@ -28,6 +28,9 @@ class GenerateLLMRequest(BaseModel):
     input: str
     context: str
 
+class SearchRequest(BaseModel):
+    user: str
+    query: str
 
 class AddDocument(BaseModel):
     user: str
