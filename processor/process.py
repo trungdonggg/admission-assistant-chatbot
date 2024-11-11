@@ -67,12 +67,16 @@ class Processor:
                 limit=limit
             )
         )
-        print(search_results)
+
+        similar_text = []
+        for result in search_results[0]["query_results"]:
+            similar_text.append(result["properties"]["chunk"])
+        print(similar_text)
 
         generated_response = await generate_by_llm(
             GenerateLLMRequest(
                 input=query,
-                context=str(search_results + chat_history)
+                context=str(similar_text + chat_history)
             )
         )
         print (type(generated_response))
@@ -83,8 +87,8 @@ class Processor:
             AddChatHistoryRequestDatabase(
                 user=user,
                 messages = [
-                    f"role: human, content: {query}",
-                    f"role: AI, content: {generated_response}"
+                    {"role": "human", "content": query},
+                    {"role": "AI", "content": generated_response}
                 ]
             )
         )

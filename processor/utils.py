@@ -139,7 +139,7 @@ async def query_vectordb(request: QueryVectorDatabase):
         response = await client.post(url, headers=headers, json=payload)
         response.raise_for_status()
     
-    return response.json().get("query_results")
+    return response.json()
 
 
 async def generate_by_llm(request: GenerateLLMRequest):

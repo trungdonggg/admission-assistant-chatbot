@@ -62,7 +62,8 @@ async def add_document(req: QueryRequest):
             config.weaviate_collection_name, 
             req.vector, 
             req.content, 
-            req.limit)
+            req.limit
+        )
         return {"query_results": response}, 200
     except Exception as e:
         return HTTPException(status_code=500, detail=str(e))

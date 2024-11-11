@@ -67,11 +67,12 @@ class WeaviateDB:
         collection = self.get_collection(collection_name)
         response = await collection.query.hybrid(
             query=content,
-            alpha=0,
+            alpha=0.2,
             vector=vector,
             limit=limit,
             return_metadata=wvc.query.MetadataQuery(certainty=True)
         )
+        print(response.objects)
         return response.objects
     
     async def close_connection(self):
