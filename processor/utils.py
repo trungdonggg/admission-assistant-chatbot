@@ -12,7 +12,7 @@ vectordb_api_host = local
 embedding_api_host = server_226
 llm_api_host = "192.168.80.95"
 processor_api_host = "192.168.80.82"
-textsplitter_api_host = "192.168.80.120"
+textsplitter_api_host = "192.168.80.166"
 
 
 async def split_document(content: str, chunk_size: int = 100, chunk_overlap: int = 20):
