@@ -5,7 +5,7 @@ import json
 
 server_235 = "192.168.10.235"
 server_226 = "128.214.255.226"
-local = "0.0.0.0"
+local = "192.168.80.138"
 
 database_api_host = local
 vectordb_api_host = local
