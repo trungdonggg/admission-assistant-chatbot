@@ -10,9 +10,9 @@ local = "0.0.0.0"
 database_api_host = local
 vectordb_api_host = local
 embedding_api_host = server_226
-llm_api_host = local
-processor_api_host = local
-textsplitter_api_host = local
+llm_api_host = "192.168.80.95"
+processor_api_host = "192.168.80.82"
+textsplitter_api_host = "192.168.80.120"
 
 
 async def split_document(content: str, chunk_size: int = 100, chunk_overlap: int = 20):

@@ -52,12 +52,15 @@ class Processor:
         query = request.query
         limit = 5
 
-        print(user, query)
+        print("user:", user)
+        print("query:", query)
 
         query_vector = await vectorize(VectorizeRequest(content=[query]))
+        print("vector size:")
         print(len(query_vector[0]))
 
         chat_history = await get_chat_history(user)
+        print("chat history:")
         print(chat_history)
 
         search_results = await query_vectordb(
@@ -71,6 +74,7 @@ class Processor:
         similar_text = []
         for result in search_results[0]["query_results"]:
             similar_text.append(result["properties"]["chunk"])
+        print("query results:")
         print(similar_text)
 
         generated_response = await generate_by_llm(
@@ -80,6 +84,7 @@ class Processor:
             )
         )
         print (type(generated_response))
+        print("generated response:")
         print (generated_response)
 
 

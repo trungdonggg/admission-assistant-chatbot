@@ -69,19 +69,6 @@ async def add_document(req: QueryRequest):
         return HTTPException(status_code=500, detail=str(e))
 
 
-# @app.get("/retriever", response_model=dict)
-# async def query_document(content: str, vector: List[float], limit: int = 10):
-#     try:
-#         # Convert the comma-separated string to a list of floats
-#         vector_list = [float(num) for num in vector.split(",")]
-
-#         # Now use vector_list in place of vector
-#         response = await weaviate_db.query(config.weaviate_collection_name, vector_list, content, limit)
-#         return {"query_results": response}
-#     except Exception as e:
-#         return HTTPException(status_code=500, detail=str(e))
-
-
 @app.delete("/retriever", response_model=list)
 async def delete_document(document_name: str):
     try:

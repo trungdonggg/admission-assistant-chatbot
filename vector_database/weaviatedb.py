@@ -13,10 +13,10 @@ class WeaviateDB:
     def __init__(self):
         self.client = weaviate.WeaviateAsyncClient(
             connection_params=ConnectionParams.from_params(
-                http_host="localhost",
+                http_host=config.weaviate_host,
                 http_port=config.weaviate_service,
                 http_secure=0,
-                grpc_host="localhost",
+                grpc_host=config.weaviate_host,
                 grpc_port=config.weaviate_grpc,
                 grpc_secure=0,
             )
