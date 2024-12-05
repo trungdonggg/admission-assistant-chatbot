@@ -50,7 +50,7 @@ class Processor:
     async def search(self, request: SearchRequest):
         user = request.user
         query = request.query
-        limit = 5
+        limit = 10
 
         print("user:", user)
         print("query:", query)
@@ -65,7 +65,7 @@ class Processor:
 
         search_results = await query_vectordb(
             QueryVectorDatabase(
-                content=query,
+                content=query + str(chat_history[-10:]),
                 vector=query_vector[0],
                 limit=limit
             )
