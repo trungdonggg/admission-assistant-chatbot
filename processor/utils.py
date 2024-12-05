@@ -11,7 +11,7 @@ database_api_host = local
 vectordb_api_host = local
 embedding_api_host = server_226
 llm_api_host = local
-processor_api_host = "192.168.80.82"
+processor_api_host = "192.168.80.166"
 textsplitter_api_host = "192.168.80.166"
 
 
