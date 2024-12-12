@@ -80,7 +80,72 @@ class Processor:
         generated_response = await generate_by_llm(
             GenerateLLMRequest(
                 input=query,
-                context=str(similar_text + chat_history)
+                context=similar_text,
+                history=chat_history[-10:]
+            )
+        )
+        print (type(generated_response))
+        print("generated response:")
+        print (generated_response)
+
+
+        await add_chat_history(
+            AddChatHistoryRequestDatabase(
+                user=user,
+                messages = [
+                    {"role": "human", "content": query},
+                    {"role": "AI", "content": generated_response}
+                ]
+            )
+        )
+
+        return generated_response
+
+async def search_tagname(self, request: SearchRequest):
+        user = request.user
+        query = request.query
+        limit = 5
+
+        print("user:", user)
+        print("query:", query)
+
+        query_vector = await vectorize(VectorizeRequest(content=[query]))
+        print("vector size:")
+        print(len(query_vector[0]))
+
+        chat_history = await get_chat_history(user)
+        print("chat history:")
+        print(chat_history)
+
+        tagnames = await tagnames_cls(
+            TagnameClassifier(
+                history=chat_history[-10:],
+                input=query
+            )
+        )
+        print("tagnames:")
+        print(tagnames)
+
+        search_results = await query_vectordb_tagnames(
+            QueryVectorDatabaseTagname(
+                content=query,
+                vector=query_vector[0],
+                limit=limit,
+                tagname=list(tagnames)
+            )
+        )
+
+        similar_text = []
+        for result in search_results[0]["query_results"]:
+            similar_text.append(result["properties"]["chunk"])
+        print("query results:")
+        print(similar_text)
+
+        generated_response = await generate_by_llm(
+            GenerateLLMRequest(
+                input=query,
+                context=similar_text,
+                history=chat_history[-10:]
             )
         )
         print (type(generated_response))

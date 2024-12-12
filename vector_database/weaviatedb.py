@@ -67,9 +67,22 @@ class WeaviateDB:
         collection = self.get_collection(collection_name)
         response = await collection.query.hybrid(
             query=content,
-            alpha=0.2,
+            alpha=0.5,
             vector=vector,
             limit=limit,
+            return_metadata=wvc.query.MetadataQuery(certainty=True)
+        )
+        print(response.objects)
+        return response.objects
+    
+    async def query_tagname_based(self, collection_name: str, vector: List[float], content: str, tagname: List[str], limit: int = 10):
+        collection = self.get_collection(collection_name)
+        response = await collection.query.hybrid(
+            query=content,
+            alpha=0.5,
+            vector=vector,
+            limit=limit,
+            filters=Filter.by_property("tag_name").contains_any(tagname),
             return_metadata=wvc.query.MetadataQuery(certainty=True)
         )
         print(response.objects)

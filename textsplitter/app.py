@@ -7,8 +7,8 @@ app = FastAPI()
 
 class TextSplitRequest(BaseModel):
     text: str
-    chunk_size: int = 500  # Default chunk size
-    chunk_overlap: int = 200  # Default chunk overlap
+    chunk_size: int = 200  # Default chunk size
+    chunk_overlap: int = 20  # Default chunk overlap
 
 class TextSplitResponse(BaseModel):
     chunks: List[str]

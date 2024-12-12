@@ -16,8 +16,9 @@ embedding_api_port=5000
 
 llm_api_port=5001
 
-
 textsplitter_api_port=5002
+
+classifier_api_port=5003
 
 processor_api_port=7000
 

@@ -20,6 +20,13 @@ class QueryRequest(BaseModel):
     limit: int 
 
 
+class QueryTagnameBasedRequest(BaseModel):
+    content: Optional[str]
+    vector: List[float]
+    limit: int 
+    tagname: List[str]
+
+
 weaviate_db: WeaviateDB = None
 
 @asynccontextmanager
@@ -55,14 +62,29 @@ async def add_document(doc: DocumentRequest):
         return HTTPException(status_code=500, detail=str(e))
     
 
-@app.post("/retriever-get", response_model=list)
-async def add_document(req: QueryRequest):
+@app.post("/retriever/query", response_model=list)
+async def query(req: QueryRequest):
     try:
         response = await weaviate_db.query(
             config.weaviate_collection_name, 
             req.vector, 
             req.content, 
             req.limit
+        )
+        return {"query_results": response}, 200
+    except Exception as e:
+        return HTTPException(status_code=500, detail=str(e))
+    
+
+@app.post("/retriever/query_tagname_based", response_model=list)
+async def query_tagname_based(req: QueryTagnameBasedRequest):
+    try:
+        response = await weaviate_db.query_tagname_based(
+            config.weaviate_collection_name, 
+            req.vector, 
+            req.content, 
+            req.limit,
+            tagname=req.tagname,
         )
         return {"query_results": response}, 200
     except Exception as e:

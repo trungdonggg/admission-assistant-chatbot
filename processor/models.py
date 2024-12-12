@@ -20,13 +20,14 @@ class CreateDocumentRequestVectorDatabase(BaseModel):
     vectors: List[List[float]]
 
 class QueryVectorDatabase(BaseModel):
-    content: str        #query + history
+    content: str 
     vector: List[float]
     limit: int
 
 class GenerateLLMRequest(BaseModel):
     input: str
     context: str
+    history: List
 
 class SearchRequest(BaseModel):
     user: str
@@ -37,3 +38,13 @@ class AddDocument(BaseModel):
     document_name: str
     tag_name: str
     document_content: str
+
+class TagnameClassifier(BaseModel):
+    history: List
+    input: str
+
+class QueryVectorDatabaseTagname(BaseModel):
+    content: str 
+    vector: List[float]
+    limit: int
+    tagname: List[str]

@@ -1,18 +1,19 @@
 import config
 from processor.models import *
 import httpx
-import json
 
 server_235 = "192.168.10.235"
 server_226 = "128.214.255.226"
-local = "192.168.80.138"
+local = "0.0.0.0"
+
 
 database_api_host = local
 vectordb_api_host = local
 embedding_api_host = server_226
 llm_api_host = local
-processor_api_host = "192.168.80.166"
-textsplitter_api_host = "192.168.80.166"
+processor_api_host = local
+textsplitter_api_host = local
+classifier_api_host = local
 
 
 async def split_document(content: str, chunk_size: int = 100, chunk_overlap: int = 20):
@@ -127,7 +128,7 @@ async def get_chat_history(user: str):
 
 
 async def query_vectordb(request: QueryVectorDatabase):
-    url = f"http://{vectordb_api_host}:{config.vectordb_api_port}/retriever-get"
+    url = f"http://{vectordb_api_host}:{config.vectordb_api_port}/retriever/query"
     
     payload = request.model_dump()
     
@@ -157,5 +158,35 @@ async def generate_by_llm(request: GenerateLLMRequest):
     
     return response.text
 
+
+async def query_vectordb_tagnames(request: QueryVectorDatabaseTagname):
+    url = f"http://{vectordb_api_host}:{config.vectordb_api_port}/retriever/query_tagname_based"
+    
+    payload = request.model_dump()
+    
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+    
+    return response.json()
+
+async def tagnames_cls(request: TagnameClassifier):
+    url = f"http://{classifier_api_host}:{config.llm_api_port}/classify"
+    
+    payload = request.model_dump()
+    
+    headers = {
+        'Content-Type': 'application/json'
+    }
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+    
+    return response.json().get("tagname")
 
 
