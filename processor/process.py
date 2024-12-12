@@ -65,7 +65,7 @@ class Processor:
 
         search_results = await query_vectordb(
             QueryVectorDatabase(
-                content=query + str(chat_history[-10:]),
+                content=query,
                 vector=query_vector[0],
                 limit=limit
             )
@@ -101,7 +101,7 @@ class Processor:
 
         return generated_response
 
-async def search_tagname(self, request: SearchRequest):
+    async def search_tagname(self, request: SearchRequest):
         user = request.user
         query = request.query
         limit = 5
