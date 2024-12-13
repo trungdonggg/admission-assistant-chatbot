@@ -33,3 +33,10 @@ async def search(request: SearchRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/search_tagname_based")
+async def search_tagname(request: SearchRequest):
+    try:
+        response = await processor.search_tagname(request)
+        return {"response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -22,3 +22,16 @@ classifier_api_port=5003
 
 processor_api_port=7000
 
+
+server_235 = "192.168.10.235"
+server_226 = "128.214.255.226"
+local = "0.0.0.0"
+
+
+database_api_host = local
+vectordb_api_host = local
+embedding_api_host = server_226
+llm_api_host = local
+processor_api_host = local
+textsplitter_api_host = local
+classifier_api_host = local

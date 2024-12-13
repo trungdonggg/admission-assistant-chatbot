@@ -11,8 +11,13 @@ def get_classifier_prompt():
     
     return ChatPromptTemplate.from_messages(
         [
-            ("system", "You are an assistant who speaks in Vietnamese. \
-                        Based on the information provided, determine names of universities provided."),
+            (
+                "system", 
+                "You are an assistant who speaks in Vietnamese. Based on the information provided, only find names of universities. "
+                "Return the names in a Python list format, with the following format: List[str]. "
+                "Do not answer anything else, do not make up any university name yourself. "
+                "Only output the Python list, nothing else."
+            ),
             MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
         ]

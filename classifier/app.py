@@ -20,6 +20,7 @@ async def generate_response(request: ClassifierTemplate):
     
     try:
         response = await bot.ainvoke(request)
+        print(response.content)
         return Response(content=response.content, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 

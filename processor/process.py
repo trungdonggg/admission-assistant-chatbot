@@ -100,6 +100,8 @@ class Processor:
         )
 
         return generated_response
+    
+    
 
     async def search_tagname(self, request: SearchRequest):
         user = request.user
@@ -119,7 +121,7 @@ class Processor:
 
         tagnames = await tagnames_cls(
             TagnameClassifier(
-                history=chat_history[-10:],
+                history=chat_history[-6:],
                 input=query
             )
         )
@@ -145,7 +147,7 @@ class Processor:
             GenerateLLMRequest(
                 input=query,
                 context=similar_text,
-                history=chat_history[-10:]
+                history=chat_history[-6:]
             )
         )
         print (type(generated_response))

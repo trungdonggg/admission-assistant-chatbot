@@ -1,23 +1,11 @@
-import config
+from config import *
 from processor.models import *
 import httpx
-
-server_235 = "192.168.10.235"
-server_226 = "128.214.255.226"
-local = "0.0.0.0"
-
-
-database_api_host = local
-vectordb_api_host = local
-embedding_api_host = server_226
-llm_api_host = local
-processor_api_host = local
-textsplitter_api_host = local
-classifier_api_host = local
-
+import ast
+import re
 
 async def split_document(content: str, chunk_size: int = 100, chunk_overlap: int = 20):
-    url = f"http://{textsplitter_api_host}:{config.textsplitter_api_port}/splittext"
+    url = f"http://{textsplitter_api_host}:{textsplitter_api_port}/splittext"
     
     payload = {
         "text": content,
@@ -36,7 +24,7 @@ async def split_document(content: str, chunk_size: int = 100, chunk_overlap: int
     return response.json().get("chunks")       #List[str]     
 
 async def add_document_name_and_tagname_to_db(request: AddDocumentRequestDatabase):
-    url = f"http://{database_api_host}:{config.database_api_port}/db/documents"
+    url = f"http://{database_api_host}:{database_api_port}/db/documents"
     
     payload = request.model_dump()
     
@@ -52,7 +40,7 @@ async def add_document_name_and_tagname_to_db(request: AddDocumentRequestDatabas
 
 
 async def vectorize(request: VectorizeRequest):
-    url = f"http://{embedding_api_host}:{config.embedding_api_port}/vectorize"
+    url = f"http://{embedding_api_host}:{embedding_api_port}/vectorize"
     
     payload = request.model_dump()
 
@@ -68,7 +56,7 @@ async def vectorize(request: VectorizeRequest):
 
 
 async def add_document_to_vectordb(request: CreateDocumentRequestVectorDatabase):
-    url = f"http://{vectordb_api_host}:{config.vectordb_api_port}/retriever"
+    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever"
     
     payload = request.model_dump()
 
@@ -84,7 +72,7 @@ async def add_document_to_vectordb(request: CreateDocumentRequestVectorDatabase)
 
 
 async def remove_document_from_db(document_name: str):
-    url = f"http://{database_api_host}:{config.database_api_port}/db/documents?document_name={document_name}"
+    url = f"http://{database_api_host}:{database_api_port}/db/documents?document_name={document_name}"
     
     async with httpx.AsyncClient() as client:
         response = await client.delete(url)
@@ -94,7 +82,7 @@ async def remove_document_from_db(document_name: str):
 
 
 async def remove_document_from_vectordb(document_name: str):
-    url = f"http://{vectordb_api_host}:{config.vectordb_api_port}/retriever?document_name={document_name}"
+    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever?document_name={document_name}"
     
     async with httpx.AsyncClient() as client:
         response = await client.delete(url)
@@ -103,7 +91,7 @@ async def remove_document_from_vectordb(document_name: str):
     return response.json()
 
 async def add_chat_history(request: AddChatHistoryRequestDatabase):
-    url = f"http://{database_api_host}:{config.database_api_port}/db/history"
+    url = f"http://{database_api_host}:{database_api_port}/db/history"
     
     payload = request.model_dump()
     
@@ -118,7 +106,7 @@ async def add_chat_history(request: AddChatHistoryRequestDatabase):
     return response.json()
 
 async def get_chat_history(user: str):
-    url = f"http://{database_api_host}:{config.database_api_port}/db/history?user={user}"
+    url = f"http://{database_api_host}:{database_api_port}/db/history?user={user}"
     
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
@@ -128,7 +116,7 @@ async def get_chat_history(user: str):
 
 
 async def query_vectordb(request: QueryVectorDatabase):
-    url = f"http://{vectordb_api_host}:{config.vectordb_api_port}/retriever/query"
+    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever/query"
     
     payload = request.model_dump()
     
@@ -144,7 +132,7 @@ async def query_vectordb(request: QueryVectorDatabase):
 
 
 async def generate_by_llm(request: GenerateLLMRequest):
-    url = f"http://{llm_api_host}:{config.llm_api_port}/generate"
+    url = f"http://{llm_api_host}:{llm_api_port}/generate"
     
     payload = request.model_dump()
     
@@ -160,7 +148,7 @@ async def generate_by_llm(request: GenerateLLMRequest):
 
 
 async def query_vectordb_tagnames(request: QueryVectorDatabaseTagname):
-    url = f"http://{vectordb_api_host}:{config.vectordb_api_port}/retriever/query_tagname_based"
+    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever/query_tagname_based"
     
     payload = request.model_dump()
     
@@ -175,7 +163,8 @@ async def query_vectordb_tagnames(request: QueryVectorDatabaseTagname):
     return response.json()
 
 async def tagnames_cls(request: TagnameClassifier):
-    url = f"http://{classifier_api_host}:{config.llm_api_port}/classify"
+    print("finding universities tagnames...")
+    url = f"http://{classifier_api_host}:{classifier_api_port}/classify"
     
     payload = request.model_dump()
     
@@ -186,7 +175,15 @@ async def tagnames_cls(request: TagnameClassifier):
     async with httpx.AsyncClient() as client:
         response = await client.post(url, headers=headers, json=payload)
         response.raise_for_status()
-    
-    return response.json().get("tagname")
+
+    match = re.search(r"\[.*\]", response.text)
+
+    if match:
+        cleaned_input_str = match.group(0)
+        university_list = ast.literal_eval(cleaned_input_str)
+        return university_list
+    else:
+        print("No valid list found in the classified string.")
+        return []
 
 

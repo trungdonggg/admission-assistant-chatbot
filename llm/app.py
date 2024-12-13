@@ -18,15 +18,10 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post("/generate")
 async def generate_response(request: ChatTemplate):
-    
-    prompt_components = ChatTemplate(
-        history=request.history,
-        context=request.context,
-        input=request.input
-    )
 
     try:
-        response = await bot.ainvoke(prompt_components)
+        response = await bot.ainvoke(request)
+        print(response.content)
         return Response(content=response.content, status_code=200)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 
