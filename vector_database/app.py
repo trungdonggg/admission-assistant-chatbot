@@ -4,7 +4,10 @@ from pydantic import BaseModel
 from typing import List, Optional
 from weaviatedb import WeaviateDB
 import config
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class DocumentRequest(BaseModel):
@@ -59,6 +62,7 @@ async def add_document(doc: DocumentRequest):
         )
         return {"message": "Document added successfully", "response": response}
     except Exception as e:
+        logger.error(f"Error in adding document to weaviate: {str(e)}", exc_info=True)
         return HTTPException(status_code=500, detail=str(e))
     
 
@@ -73,6 +77,7 @@ async def query(req: QueryRequest):
         )
         return {"query_results": response}, 200
     except Exception as e:
+        logger.error(f"Error in querying: {str(e)}", exc_info=True)
         return HTTPException(status_code=500, detail=str(e))
     
 
@@ -83,11 +88,12 @@ async def query_tagname_based(req: QueryTagnameBasedRequest):
             config.weaviate_collection_name, 
             req.vector, 
             req.content, 
+            req.tagname,
             req.limit,
-            tagname=req.tagname,
         )
         return {"query_results": response}, 200
     except Exception as e:
+        logger.error(f"Error in retrieving with tagnames: {str(e)}", exc_info=True)
         return HTTPException(status_code=500, detail=str(e))
 
 
@@ -97,4 +103,5 @@ async def delete_document(document_name: str):
         response = await weaviate_db.remove_document(config.weaviate_collection_name, document_name)
         return {"message": "Document deleted successfully", "response": response}, 200
     except Exception as e:
+        logger.error(f"Error in retrieving: {str(e)}", exc_info=True)
         return HTTPException(status_code=500, detail=str(e))

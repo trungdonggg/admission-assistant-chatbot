@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
+
 load_dotenv()
 
 
@@ -13,9 +14,9 @@ def get_classifier_prompt():
         [
             (
                 "system", 
-                "You are an assistant who speaks in Vietnamese. Based on the information provided, only find names of universities. "
+                "You are an assistant who speaks in Vietnamese. Based on the conversation below, find names of universities they are talking about."
                 "Return the names in a Python list format, with the following format: List[str]. "
-                "Do not answer anything else, do not make up any university name yourself. "
+                "Do not answer anything in the conversation, do not make up any university name yourself. "
                 "Only output the Python list, nothing else."
             ),
             MessagesPlaceholder(variable_name="history"),

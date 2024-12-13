@@ -1,9 +1,12 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Response
-from pydantic import BaseModel
 from llm.utils import *
 from llm.chat_template import ChatTemplate
 from llm.generator import Generator
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 bot: Generator = None
@@ -24,4 +27,5 @@ async def generate_response(request: ChatTemplate):
         print(response.content)
         return Response(content=response.content, status_code=200)
     except Exception as e:
+        logger.error(f"Error in generating response: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e)) 

@@ -2,7 +2,10 @@ from flask import Flask
 from flask_restful import Api
 from mongo import ChatHistory, Documents
 import config
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 api = Api(app)

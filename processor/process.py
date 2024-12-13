@@ -80,11 +80,10 @@ class Processor:
         generated_response = await generate_by_llm(
             GenerateLLMRequest(
                 input=query,
-                context=similar_text,
+                context=str(similar_text),
                 history=chat_history[-10:]
             )
         )
-        print (type(generated_response))
         print("generated response:")
         print (generated_response)
 
@@ -94,7 +93,7 @@ class Processor:
                 user=user,
                 messages = [
                     {"role": "human", "content": query},
-                    {"role": "AI", "content": generated_response}
+                    {"role": "ai", "content": generated_response}
                 ]
             )
         )
@@ -133,7 +132,7 @@ class Processor:
                 content=query,
                 vector=query_vector[0],
                 limit=limit,
-                tagname=list(tagnames)
+                tagname=tagnames
             )
         )
 
@@ -146,7 +145,7 @@ class Processor:
         generated_response = await generate_by_llm(
             GenerateLLMRequest(
                 input=query,
-                context=similar_text,
+                context=str(similar_text),
                 history=chat_history[-6:]
             )
         )
@@ -160,7 +159,7 @@ class Processor:
                 user=user,
                 messages = [
                     {"role": "human", "content": query},
-                    {"role": "AI", "content": generated_response}
+                    {"role": "ai", "content": generated_response}
                 ]
             )
         )

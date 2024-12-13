@@ -173,7 +173,8 @@ async def tagnames_cls(request: TagnameClassifier):
     }
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
 
     match = re.search(r"\[.*\]", response.text)

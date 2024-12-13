@@ -11,5 +11,6 @@ class Classifier:
         print(prompt)
         return await self.model.ainvoke(prompt)
     
+ 
 
 

@@ -76,6 +76,9 @@ class WeaviateDB:
         return response.objects
     
     async def query_tagname_based(self, collection_name: str, vector: List[float], content: str, tagname: List[str], limit: int = 10):
+        if tagname == []:
+            return await self.query(collection_name, vector, content, limit)
+        
         collection = self.get_collection(collection_name)
         response = await collection.query.hybrid(
             query=content,

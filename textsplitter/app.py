@@ -2,6 +2,10 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -47,5 +51,6 @@ async def split_text(request: TextSplitRequest):
         return TextSplitResponse(chunks=chunks)
 
     except Exception as e:
+        logger.error(f"Error in splitting text: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 

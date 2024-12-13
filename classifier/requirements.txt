@@ -5,3 +5,4 @@ typing
 pydantic
 fastapi
 uvicorn
+langchain_google_vertexai
