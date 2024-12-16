@@ -21,7 +21,10 @@ app = FastAPI(lifespan=lifespan)
 @app.post("/vectorize")
 async def generate_response(request):
     try:
+        print(request)
+        print(type(request))
         content = request.content
+        print(content)
         response = await embedder.embed(content)
         return Response(content=response, status_code=200)
     except Exception as e:
