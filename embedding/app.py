@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from embed import Embedding
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Response
@@ -18,13 +19,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
+class VectorizeRequest(BaseModel):
+    content: str
+    
+    
 @app.post("/vectorize")
-async def generate_response(request):
+async def generate_response(request: VectorizeRequest):
     try:
-        print(request)
-        print(type(request))
         content = request.content
-        print(content)
         response = await embedder.embed(content)
         return Response(content=response, status_code=200)
     except Exception as e:
