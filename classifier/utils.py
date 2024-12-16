@@ -14,10 +14,7 @@ def get_classifier_prompt():
         [
             (
                 "system", 
-                "You are an assistant who speaks in Vietnamese. Based on the conversation below, find names of universities they are talking about."
-                "Return the names in a Python list format, with the following format: List[str]. "
-                "Do not answer anything in the conversation, do not make up any university name yourself. "
-                "Only output the Python list, nothing else."
+                "You are an assistant who speaks in Vietnamese. Your task is to extract the name of the university or universities the user is specifically asking about, based primarily on the last question in the conversation. Do not provide answers or summaries, only return a list of the universities the user is asking about. Your output should be in the format: List[str]. Only provide the list and nothing else."
             ),
             MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
@@ -25,6 +22,7 @@ def get_classifier_prompt():
     )
 
 def get_model():
+    
     return ChatGoogleGenerativeAI(
         model="gemini-1.5-flash",
         google_api_key=os.getenv("GOOGLE_AI_API_KEY"),
