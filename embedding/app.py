@@ -21,7 +21,7 @@ app = FastAPI(lifespan=lifespan)
 
 
 class VectorizeRequest(BaseModel):
-    content: str
+    content: list
     
     
 @app.post("/vectorize")
