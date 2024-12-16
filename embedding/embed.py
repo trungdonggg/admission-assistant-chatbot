@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from langchain_huggingface import HuggingFaceEmbeddings
 
 modelname = "dangvantuan/vietnamese-embedding"
