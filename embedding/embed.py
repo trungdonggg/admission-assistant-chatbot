@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from langchain_huggingface import HuggingFaceEmbeddings
 
 modelname = "dangvantuan/vietnamese-embedding"
@@ -17,6 +18,7 @@ class Embedding:
 
         try:
             vectors = [self.embed_model.embed_query(text) for text in content]
-            return {"vectors": vectors}, 200
+            return vectors
         except Exception as e:
-            return {"error": str(e)}, 500
+            raise Exception(f"Error in embedding: {str(e)}")
+            

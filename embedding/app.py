@@ -25,11 +25,11 @@ class VectorizeRequest(BaseModel):
     
     
 @app.post("/vectorize")
-async def generate_response(request: VectorizeRequest):
+def generate_response(request: VectorizeRequest):
     try:
         content = request.content
-        response = await embedder.embed(content)
-        return Response(content=response, status_code=200)
+        response = embedder.embed(content)
+        return Response(content={"vectors": response}, status_code=200)
     except Exception as e:
         logger.error(f"Error in generating response: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
