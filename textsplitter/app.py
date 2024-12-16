@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter, CharacterTextSplitter
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -21,24 +21,34 @@ class TextSplitResponse(BaseModel):
 @app.post("/splittext", response_model=TextSplitResponse)
 async def split_text(request: TextSplitRequest):
     try:
-        text_splitter = RecursiveCharacterTextSplitter(
-            separators=[
+        text_splitter = CharacterTextSplitter(
+            separator=[
                 "\n\n",
                 "\n",
-                ".",
-                ",",
-                "\u200b",  # Zero-width space
-                "\uff0c",  # Fullwidth comma
-                "\u3001",  # Ideographic comma
-                "\uff0e",  # Fullwidth full stop
-                "\u3002",  # Ideographic full stop
-                "",
-            ],
+                ".",],
             chunk_size=request.chunk_size,
-            chunk_overlap=request.chunk_overlap,
-            length_function=len,
-            is_separator_regex=False,
+            chunk_overlap=request.chunk_overlap
         )
+        
+        
+        # text_splitter = RecursiveCharacterTextSplitter(
+        #     separators=[
+        #         "\n\n",
+        #         "\n",
+        #         ".",
+        #         ",",
+        #         "\u200b",  # Zero-width space
+        #         "\uff0c",  # Fullwidth comma
+        #         "\u3001",  # Ideographic comma
+        #         "\uff0e",  # Fullwidth full stop
+        #         "\u3002",  # Ideographic full stop
+        #         "",
+        #     ],
+        #     chunk_size=request.chunk_size,
+        #     chunk_overlap=request.chunk_overlap,
+        #     length_function=len,
+        #     is_separator_regex=False,
+        # )
         
         chunks = text_splitter.split_text(request.text) 
         
