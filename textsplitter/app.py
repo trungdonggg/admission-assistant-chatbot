@@ -11,8 +11,8 @@ app = FastAPI()
 
 class TextSplitRequest(BaseModel):
     text: str
-    chunk_size: int = 400  # Default chunk size
-    chunk_overlap: int = 40  # Default chunk overlap
+    chunk_size: int = 200  
+    chunk_overlap: int = 20 
 
 class TextSplitResponse(BaseModel):
     chunks: List[str]
@@ -21,7 +21,6 @@ class TextSplitResponse(BaseModel):
 @app.post("/splittext", response_model=TextSplitResponse)
 async def split_text(request: TextSplitRequest):
     try:
-        # Initialize text splitter with the specified chunk size and overlap
         text_splitter = RecursiveCharacterTextSplitter(
             separators=[
                 "\n\n",

@@ -1,16 +1,30 @@
-from flask import Flask
-from flask_restful import Api
 from embed import Embedding
-import config
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, Response
+
 import logging
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-api = Api(app)
+embedder: Embedding = None
 
-api.add_resource(Embedding, '/vectorize')
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global embedder
+    embedder = Embedding()
+    yield
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=config.embedding_api_port)
+app = FastAPI(lifespan=lifespan)
+
+@app.post("/vectorize")
+async def generate_response(request):
+    try:
+        content = request.content
+        response = await embedder.embed(content)
+        return Response(content=response, status_code=200)
+    except Exception as e:
+        logger.error(f"Error in generating response: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+

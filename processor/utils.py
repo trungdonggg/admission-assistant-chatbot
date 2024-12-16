@@ -18,7 +18,8 @@ async def split_document(content: str, chunk_size: int = 100, chunk_overlap: int
     }
 
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
 
     return response.json().get("chunks")       #List[str]     
@@ -33,7 +34,8 @@ async def add_document_name_and_tagname_to_db(request: AddDocumentRequestDatabas
     }
 
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
 
     return response.json()
@@ -49,7 +51,8 @@ async def vectorize(request: VectorizeRequest):
     }
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
     
     return response.json().get("vectors")
@@ -65,7 +68,8 @@ async def add_document_to_vectordb(request: CreateDocumentRequestVectorDatabase)
     }
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
     
     return response.json()
@@ -75,7 +79,8 @@ async def remove_document_from_db(document_name: str):
     url = f"http://{database_api_host}:{database_api_port}/db/documents?document_name={document_name}"
     
     async with httpx.AsyncClient() as client:
-        response = await client.delete(url)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.delete(url, timeout=timeout)
         response.raise_for_status()
     
     return response.json()
@@ -85,7 +90,8 @@ async def remove_document_from_vectordb(document_name: str):
     url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever?document_name={document_name}"
     
     async with httpx.AsyncClient() as client:
-        response = await client.delete(url)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.delete(url, timeout=timeout)
         response.raise_for_status()
     
     return response.json()
@@ -100,7 +106,8 @@ async def add_chat_history(request: AddChatHistoryRequestDatabase):
     }
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
     
     return response.json()
@@ -109,7 +116,8 @@ async def get_chat_history(user: str):
     url = f"http://{database_api_host}:{database_api_port}/db/history?user={user}"
     
     async with httpx.AsyncClient() as client:
-        response = await client.get(url)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.get(url, timeout=timeout)
         response.raise_for_status()
     
     return response.json().get("history")
@@ -125,7 +133,8 @@ async def query_vectordb(request: QueryVectorDatabase):
     }
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
     
     return response.json()
@@ -141,7 +150,8 @@ async def generate_by_llm(request: GenerateLLMRequest):
     }
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
     
     return response.text
@@ -157,7 +167,8 @@ async def query_vectordb_tagnames(request: QueryVectorDatabaseTagname):
     }
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(url, headers=headers, json=payload)
+        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
     
     return response.json()

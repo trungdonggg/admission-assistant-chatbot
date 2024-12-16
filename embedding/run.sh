@@ -1,7 +1,7 @@
-
 export PYTHONPATH=$(dirname "$(pwd -P)")
+
+apt install uvicorn
 
 pip install -r requirements.txt
 
-python3 app.py
-
+uvicorn app:app --reload --host 0.0.0.0 --port 5000
