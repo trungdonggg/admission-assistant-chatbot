@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
-from langchain_text_splitters import RecursiveCharacterTextSplitter, CharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -11,8 +11,8 @@ app = FastAPI()
 
 class TextSplitRequest(BaseModel):
     text: str
-    chunk_size: int = 200  
-    chunk_overlap: int = 20 
+    chunk_size: int = 300  
+    chunk_overlap: int = 30 
 
 class TextSplitResponse(BaseModel):
     chunks: List[str]
@@ -21,34 +21,17 @@ class TextSplitResponse(BaseModel):
 @app.post("/splittext", response_model=TextSplitResponse)
 async def split_text(request: TextSplitRequest):
     try:
-        text_splitter = CharacterTextSplitter(
-            separator=[
+        text_splitter = RecursiveCharacterTextSplitter(
+            separators=[
                 "\n\n",
                 "\n",
-                ".",],
+                ".",
+            ],
             chunk_size=request.chunk_size,
-            chunk_overlap=request.chunk_overlap
+            chunk_overlap=request.chunk_overlap,
+            length_function=len,
+            is_separator_regex=False,
         )
-        
-        
-        # text_splitter = RecursiveCharacterTextSplitter(
-        #     separators=[
-        #         "\n\n",
-        #         "\n",
-        #         ".",
-        #         ",",
-        #         "\u200b",  # Zero-width space
-        #         "\uff0c",  # Fullwidth comma
-        #         "\u3001",  # Ideographic comma
-        #         "\uff0e",  # Fullwidth full stop
-        #         "\u3002",  # Ideographic full stop
-        #         "",
-        #     ],
-        #     chunk_size=request.chunk_size,
-        #     chunk_overlap=request.chunk_overlap,
-        #     length_function=len,
-        #     is_separator_regex=False,
-        # )
         
         chunks = text_splitter.split_text(request.text) 
         
