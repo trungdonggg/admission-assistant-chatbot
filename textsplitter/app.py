@@ -25,7 +25,6 @@ async def split_text(request: TextSplitRequest):
             separators=[
                 "\n\n",
                 "\n",
-                " ",
                 ".",
                 ",",
                 "\u200b",  # Zero-width space
@@ -41,11 +40,7 @@ async def split_text(request: TextSplitRequest):
             is_separator_regex=False,
         )
         
-        # Split the text into chunks
-        texts = text_splitter.create_documents([request.text])
-        
-        # Extract text from each chunk document
-        chunks = [text.page_content for text in texts]
+        chunks = text_splitter.split_text(request.text) 
         
         return TextSplitResponse(chunks=chunks)
 
