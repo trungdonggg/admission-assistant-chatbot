@@ -11,12 +11,12 @@ class Embedding:
             encode_kwargs={"normalize_embeddings": True}
         )
 
-    def embed(self, content):
+    async def embed(self, content):
         if not content or not isinstance(content, list):
             return {"error": "Content must be a list of strings"}, 400
 
         try:
-            vectors = [self.embed_model.embed_query(text) for text in content]
+            vectors = await self.embed_model.aembed_documents(content)
             return vectors
         except Exception as e:
             raise Exception(f"Error in embedding: {str(e)}")

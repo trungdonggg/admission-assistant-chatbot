@@ -21,14 +21,13 @@ app = FastAPI(lifespan=lifespan)
 
 
 class VectorizeRequest(BaseModel):
-    content: list
+    content: list[str]
     
     
 @app.post("/vectorize")
-def generate_response(request: VectorizeRequest):
+async def generate_response(request: VectorizeRequest):
     try:
-        content = request.content
-        response = embedder.embed(content)
+        response = await embedder.embed(request.content)
         return {"vectors": response}, 200
     except Exception as e:
         logger.error(f"Error in generating response: {str(e)}", exc_info=True)
