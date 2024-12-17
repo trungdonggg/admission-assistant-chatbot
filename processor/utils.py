@@ -22,7 +22,7 @@ async def split_document(content: str):
 
     return response.json().get("chunks")       #List[str]     
 
-async def add_document_name_and_tagname_to_db(request: AddDocumentRequestDatabase):
+async def add_document_to_db(request: AddDocumentRequestDatabase):
     url = f"http://{database_api_host}:{database_api_port}/db/documents"
     
     payload = request.model_dump()

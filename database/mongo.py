@@ -17,7 +17,8 @@ chat_history_schema = {
 documents = db["documents"]
 documents_schema = {
     "document_name":str,
-    "tag_name": str
+    "tag_name": str,
+    "content": str
 }
 
 
@@ -46,6 +47,7 @@ class Documents(Resource):
         data = request.json
         document_name = data.get("document_name")
         document_tagname = data.get("tag_name")
+        document_content = data.get("content")
         
         if not document_name:
             return {"error": "Document name is required"}, 400
@@ -53,7 +55,11 @@ class Documents(Resource):
         if documents.find_one({"document_name": document_name}):
             return {"error": "Document with this name already exists"}, 400
         
-        documents.insert_one({"document_name": document_name, "tag_name": document_tagname})
+        documents.insert_one({
+            "document_name": document_name, 
+            "tag_name": document_tagname,
+            "content": document_content
+            })
         return {"message": "Document added successfully"}, 200
 
     def delete(self):
@@ -90,23 +96,6 @@ class ChatHistory(Resource):
         
         return {"history": last_10_messages}, 200
 
-
-
-    # def post(self):
-    #     data = request.json
-    #     user = data.get("user")
-    #     messages = data.get("messages")
-        
-    #     if not user or not messages:
-    #         return {"error": "User and message are required"}, 400
-
-    #     chat_history.update_one(
-    #         {"user": user},
-    #         {"$push": {"history": messages}},
-    #         upsert=True
-    #     )
-        
-    #     return {"message": "Chat message saved successfully"}, 200
 
     def post(self):
         data = request.json

@@ -5,6 +5,7 @@ from typing import List
 class AddDocumentRequestDatabase(BaseModel):
     document_name: str
     tag_name: str
+    content: str
 
 class AddChatHistoryRequestDatabase(BaseModel):
     user: str
