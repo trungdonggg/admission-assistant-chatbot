@@ -53,6 +53,7 @@ async def add_document(request: AddDocumentRequest):
 async def delete_document(document_name: str):
     try:
         await doc.delete({"document_name": document_name})
+        return {"status": 200}
     except Exception as e:
         logger.error(f"Error in deleting document: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -64,6 +65,7 @@ async def delete_document(document_name: str):
 async def add_history(request: AddChatHistoryRequest):
     try:
         await history.post(request.model_dump()) 
+        return {"status": 200}
     except Exception as e:
         logger.error(f"Error in adding history: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

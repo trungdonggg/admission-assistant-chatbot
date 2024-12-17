@@ -87,7 +87,6 @@ class Processor:
         similar_text = []
         for result in search_results[0]["query_results"]:
             similar_text.append(result["properties"]["chunk"])
-            # similar_text.append(result["properties"]["tag_name"] + ":" + result["properties"]["chunk"])
         print("query results:")
         print(similar_text)
 

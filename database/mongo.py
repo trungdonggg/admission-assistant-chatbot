@@ -50,7 +50,6 @@ class Documents:
             return NameError
         
         await documents.delete_one({"document_name": document_name})
-        return {"status": 200}
 
 
 
@@ -89,4 +88,3 @@ class ChatHistory:
             upsert=True
         )
 
-        return {"status": 200}
