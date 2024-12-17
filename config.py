@@ -18,8 +18,6 @@ llm_api_port=5001
 
 textsplitter_api_port=5002
 
-classifier_api_port=5003
-
 processor_api_port=7000
 
 
@@ -34,4 +32,3 @@ embedding_api_host = server_226
 llm_api_host = local
 processor_api_host = local
 textsplitter_api_host = local
-classifier_api_host = local

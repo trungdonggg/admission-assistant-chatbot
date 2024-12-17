@@ -24,11 +24,13 @@ class Processor:
             print("document added to db")
 
             text_chunks = await split_document(content=document_content)
+            text_chunks_with_tagname = [tag_name + ":" + sencense for sencense in text_chunks]
             print("text chunked")
+            
             
             vectors = await vectorize(
                 VectorizeRequest(
-                    content=text_chunks
+                    content=text_chunks_with_tagname
                 )
             )
             print("vectors generated")
@@ -37,7 +39,7 @@ class Processor:
                 CreateDocumentRequestVectorDatabase(
                     document_name=document_name,
                     tag_name=tag_name,
-                    chunks=text_chunks,
+                    chunks=text_chunks_with_tagname,
                     vectors=vectors
                 )
             )
@@ -58,7 +60,7 @@ class Processor:
     async def search(self, request: SearchRequest):
         user = request.user
         query = request.query
-        limit = 5
+        limit = 2
 
         print("user:", user)
         print("query:", query)
@@ -68,33 +70,24 @@ class Processor:
         print("chat history:")
         print(chat_history)
         
-        
-        tagnames = await tagnames_cls(
-            TagnameClassifier(
-                history=chat_history[-6:],
-                input=query
-            )
-        )
-        print("tagnames:")
-        print(tagnames)
-
 
         query_vector = await vectorize(VectorizeRequest(content=[query]))
         print("vector size:")
         print(len(query_vector[0]))
         
         
-        search_results = await query_vectordb_tagnames(
-            QueryVectorDatabaseTagname(
+        search_results = await query_vectordb(
+            QueryVectorDatabase(
                 content=query,
                 vector=query_vector[0],
                 limit=limit,
-                tagname=tagnames
             )
         )
+        
         similar_text = []
         for result in search_results[0]["query_results"]:
-            similar_text.append(result["properties"]["tag_name"] + ":" + result["properties"]["chunk"])
+            similar_text.append(result["properties"]["chunk"])
+            # similar_text.append(result["properties"]["tag_name"] + ":" + result["properties"]["chunk"])
         print("query results:")
         print(similar_text)
 

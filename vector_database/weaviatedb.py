@@ -75,22 +75,6 @@ class WeaviateDB:
         print(response.objects)
         return response.objects
     
-    async def query_tagname_based(self, collection_name: str, vector: List[float], content: str, tagname: List[str], limit: int = 10):
-        if tagname == []:
-            return await self.query(collection_name, vector, content, limit)
-        
-        collection = self.get_collection(collection_name)
-        response = await collection.query.hybrid(
-            query=content,
-            alpha=0.5,
-            vector=vector,
-            limit=limit,
-            filters=Filter.by_property("tag_name").contains_any(tagname),
-            return_metadata=wvc.query.MetadataQuery(certainty=True)
-        )
-        print(response.objects)
-        return response.objects
-    
     async def close_connection(self):
         await self.client.close()
         logging.info("Disconnected from Weaviate")

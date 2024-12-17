@@ -1,8 +1,7 @@
 from config import *
 from processor.models import *
 import httpx
-import ast
-import re
+
 
 async def split_document(content: str):
     url = f"http://{textsplitter_api_host}:{textsplitter_api_port}/splittext"
@@ -154,46 +153,5 @@ async def generate_by_llm(request: GenerateLLMRequest):
     
     return response.text
 
-
-async def query_vectordb_tagnames(request: QueryVectorDatabaseTagname):
-    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever/query_tagname_based"
-    
-    payload = request.model_dump()
-    
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    
-    async with httpx.AsyncClient() as client:
-        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
-        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
-        response.raise_for_status()
-    
-    return response.json()
-
-async def tagnames_cls(request: TagnameClassifier):
-    print("finding universities tagnames...")
-    url = f"http://{classifier_api_host}:{classifier_api_port}/classify"
-    
-    payload = request.model_dump()
-    
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    
-    async with httpx.AsyncClient() as client:
-        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
-        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
-        response.raise_for_status()
-
-    match = re.search(r"\[.*\]", response.text)
-
-    if match:
-        cleaned_input_str = match.group(0)
-        university_list = ast.literal_eval(cleaned_input_str)
-        return university_list
-    else:
-        print("No valid list found in the classified string.")
-        return []
 
 

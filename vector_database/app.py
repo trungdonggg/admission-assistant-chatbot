@@ -81,22 +81,6 @@ async def query(req: QueryRequest):
         return HTTPException(status_code=500, detail=str(e))
     
 
-@app.post("/retriever/query_tagname_based", response_model=list)
-async def query_tagname_based(req: QueryTagnameBasedRequest):
-    try:
-        response = await weaviate_db.query_tagname_based(
-            config.weaviate_collection_name, 
-            req.vector, 
-            req.content, 
-            req.tagname,
-            req.limit,
-        )
-        return {"query_results": response}, 200
-    except Exception as e:
-        logger.error(f"Error in retrieving with tagnames: {str(e)}", exc_info=True)
-        return HTTPException(status_code=500, detail=str(e))
-
-
 @app.delete("/retriever", response_model=list)
 async def delete_document(document_name: str):
     try:
