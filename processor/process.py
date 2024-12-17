@@ -11,9 +11,6 @@ class Processor:
         document_name = request.document_name
         tag_name = request.tag_name
         document_content = request.document_content
-        
-        text_chunks = await split_document(content=document_content)
-        print("text chunked")
 
         await add_document_name_and_tagname_to_db(
             AddDocumentRequestDatabase(
@@ -23,6 +20,9 @@ class Processor:
         )
         print("document added to db")
 
+        text_chunks = await split_document(content=document_content)
+        print("text chunked")
+        
         vectors = await vectorize(
             VectorizeRequest(
                 content=text_chunks

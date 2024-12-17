@@ -4,13 +4,11 @@ import httpx
 import ast
 import re
 
-async def split_document(content: str, chunk_size: int = 100, chunk_overlap: int = 20):
+async def split_document(content: str):
     url = f"http://{textsplitter_api_host}:{textsplitter_api_port}/splittext"
     
     payload = {
         "text": content,
-        "chunk_size": chunk_size,
-        "chunk_overlap": chunk_overlap
     }
     
     headers = {
