@@ -10,13 +10,14 @@ def get_chatbot_prompt():
 
     return ChatPromptTemplate.from_messages(
         [
-            ("system", "Your name is David, a friendly and helpful AI chatbot. \
-                        You're an assistant who speaks in Vietnamese. Respond in 200 words or fewer. \
-                        Given a query, search the provided context for relevant information. \
+            ("system", "You are a friendly and helpful AI chatbot, who speaks in Vietnamese. Respond in 200 words or fewer. \
+                        Given a query, search the provided context for relevant information only. \
+                        If the answer cannot be found in the context, do not speculate or provide irrelevant responses. \
                         Here is the context provided: {context}."),
             MessagesPlaceholder(variable_name="history"),
             ("human", "{input}"),
         ]
+
     )
 
 

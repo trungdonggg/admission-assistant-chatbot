@@ -15,6 +15,7 @@ class Processor:
         try:
             await add_document_to_db(
                 AddDocumentRequestDatabase(
+                    user=user,
                     document_name=document_name,
                     tag_name=tag_name,
                     content=document_content,
@@ -91,13 +92,9 @@ class Processor:
                 tagname=tagnames
             )
         )
-        print("search results:")
-        print(search_results)
-        
-
         similar_text = []
         for result in search_results[0]["query_results"]:
-            similar_text.append(result["properties"]["chunk"])
+            similar_text.append(result["properties"]["tag_name"] + ":" + result["properties"]["chunk"])
         print("query results:")
         print(similar_text)
 

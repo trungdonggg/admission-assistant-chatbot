@@ -3,6 +3,7 @@ from typing import List
 
 
 class AddDocumentRequestDatabase(BaseModel):
+    user: str
     document_name: str
     tag_name: str
     content: str

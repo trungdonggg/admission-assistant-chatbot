@@ -9,14 +9,15 @@ db = client["my_database"]
 
 chat_history = db["history"]
 chat_history_schema = {
-    "user":str,
+    "user": str,
     "history": list
  }
 
 
 documents = db["documents"]
 documents_schema = {
-    "document_name":str,
+    "user": str,
+    "document_name": str,
     "tag_name": str,
     "content": str
 }
@@ -45,6 +46,7 @@ class Documents(Resource):
 
     def post(self):
         data = request.json
+        user_name = data.get("user")
         document_name = data.get("document_name")
         document_tagname = data.get("tag_name")
         document_content = data.get("content")
@@ -56,6 +58,7 @@ class Documents(Resource):
             return {"error": "Document with this name already exists"}, 400
         
         documents.insert_one({
+            "user": user_name,
             "document_name": document_name, 
             "tag_name": document_tagname,
             "content": document_content
