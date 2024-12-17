@@ -21,7 +21,6 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post("/generate")
 async def generate_response(request: ChatTemplate):
-
     try:
         response = await bot.ainvoke(request)
         print(response.content)

@@ -1,3 +1,5 @@
 pymongo
-flask
-flask_restful
+pydantic
+fastapi
+uvicorn
+typing

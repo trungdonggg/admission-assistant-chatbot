@@ -1,117 +1,92 @@
-from pymongo import MongoClient
-from flask import request
-from flask_restful import Resource
+from pymongo import AsyncMongoClient
 import config
 
 # Initialize MongoDB client and database
-client = MongoClient(f"mongodb://localhost:{config.mongo_service}/")
+client = AsyncMongoClient(host="localhost", port=config.mongo_service)
 db = client["my_database"]
 
 chat_history = db["history"]
-chat_history_schema = {
-    "user": str,
-    "history": list
- }
-
-
 documents = db["documents"]
-documents_schema = {
-    "user": str,
-    "document_name": str,
-    "tag_name": str,
-    "content": str
-}
 
 
-class Documents(Resource):
-    def get(self):
-        document_name = request.args.get("document_name")
+class Documents:
+    def __init__(self):
+        pass
+    
+    async def get(self, request):
+        document_name = request["document_name"]
         
         if document_name:
-            document = documents.find_one({"document_name": document_name})
+            document = await documents.find_one({"document_name": document_name})
             if document:
                 document["_id"] = str(document["_id"])  # Convert ObjectId to string if needed
-                return {"document": document}, 200
+                return document
             else:
-                return {"error": "Document not found"}, 404
+                return NameError
+
         else:
-            all_documents = documents.find({})
+            all_documents = await documents.find({}).to_list(None)
             document_list = []
 
             for document in all_documents:
                 document["_id"] = str(document["_id"])  # Convert ObjectId to string if needed
                 document_list.append(document)
                 
-            return {"documents": document_list}, 200
+            return document_list
 
-    def post(self):
-        data = request.json
-        user_name = data.get("user")
-        document_name = data.get("document_name")
-        document_tagname = data.get("tag_name")
-        document_content = data.get("content")
+    async def post(self, request):
+        print(request)
+        document_name = request["document_name"]
+        
+        if await documents.find_one({"document_name": document_name}):
+            return NameError
+        await documents.insert_one(request)
+
+
+    async def delete(self, request):
+        document_name = request["document_name"]
         
         if not document_name:
-            return {"error": "Document name is required"}, 400
+            return NameError
         
-        if documents.find_one({"document_name": document_name}):
-            return {"error": "Document with this name already exists"}, 400
-        
-        documents.insert_one({
-            "user": user_name,
-            "document_name": document_name, 
-            "tag_name": document_tagname,
-            "content": document_content
-            })
-        return {"message": "Document added successfully"}, 200
-
-    def delete(self):
-        document_name = request.args.get("document_name")
-        
-        if not document_name:
-            return {"error": "Document name is required"}, 400
-        
-        result = documents.delete_one({"document_name": document_name})
-        
-        if result.deleted_count == 0:
-            return {"error": "Document not found"}, 404
-        
-        return {"message": f"Document '{document_name}' deleted successfully"}, 200
+        await documents.delete_one({"document_name": document_name})
+        return {"status": 200}
 
 
 
 
-class ChatHistory(Resource):
-    def get(self):
-        user = request.args.get("user")
+class ChatHistory:
+    def __init__(self):
+        pass
+    
+    async def get(self, request):
+        user = request["user"]
         
         if not user:
             return {"error": "User is required"}, 400
         
-        history = chat_history.find_one({"user": user})
+        history = await chat_history.find_one({"user": user})
         
         if not history:
-            return {"history": []}, 200
-        
-        last_10_messages = history.get("history", [])[-10:]
+            return []
         
         history["_id"] = str(history["_id"])
         
-        return {"history": last_10_messages}, 200
+        return history["history"]
 
 
-    def post(self):
-        data = request.json
-        user = data.get("user")
-        messages = data.get("messages")
+    async def post(self, request):
+        print(request)
+        user = request["user"]
+        messages = request["messages"]
 
         if not user or not messages:
-            return {"error": "User and message are required"}, 400
+            return ValueError
 
-        chat_history.update_one(
+        await chat_history.update_one(
             {"user": user},
             {"$push": {"history": {"$each": messages}}},
             upsert=True
         )
 
-        return {"message": "Chat message saved successfully"}, 200
+        return {"status": 200}

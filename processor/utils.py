@@ -116,7 +116,7 @@ async def get_chat_history(user: str):
         timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
         response = await client.get(url, timeout=timeout)
         response.raise_for_status()
-    
+
     return response.json().get("history")
 
 

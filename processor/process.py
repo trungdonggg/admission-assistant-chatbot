@@ -60,7 +60,7 @@ class Processor:
     async def search(self, request: SearchRequest):
         user = request.user
         query = request.query
-        limit = 2
+        limit = 7
 
         print("user:", user)
         print("query:", query)
