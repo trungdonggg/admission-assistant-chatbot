@@ -1,9 +1,6 @@
-import random
-from datetime import datetime, timedelta
 from minio import Minio
 from config import *
 import json
-import io
 
 
 class MinioHandler:
@@ -19,16 +16,17 @@ class MinioHandler:
             secure=False,
         )
         self.make_bucket()
+        self.set_policy()
+        
 
     def make_bucket(self):
         if not self.client.bucket_exists(self.bucket_name):
             self.client.make_bucket(self.bucket_name)
-            self.set_policy()
         return self.bucket_name
     
     def set_policy(self):
         policy = {
-            "Version": "2025-01-01",
+            "Version": "2012-10-17",
             "Statement": [
                 {
                     "Effect": "Allow",
@@ -61,7 +59,7 @@ class MinioHandler:
 
 
     def upload(self, key, value):
-        res = self.client.fput_object(self.bucket_name, key, value)
+        res = self.client.put_object(self.bucket_name, key, value, -1, part_size=10*1024*1024)
         return res
 
     # def download(self, key, value):

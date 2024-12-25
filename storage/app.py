@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, HTTPException, UploadFile, Form
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from storage.handler import MinioHandler
 from contextlib import asynccontextmanager
 from datetime import datetime
@@ -20,8 +20,16 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post("/upload/")
 def upload_file(file: UploadFile = File(...)):
+    print(file.filename)
+    print(file.file)
+    print(file.content_type)
+    print(type(file.file))
+    
+    file.file.seek(0)
+    
+    print(file.file.read(256))
     try:
-        key = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{file.filename}"
+        key = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{file.filename}"
         res = minio_client.upload(key, file.file)
         return res
     except Exception as e:

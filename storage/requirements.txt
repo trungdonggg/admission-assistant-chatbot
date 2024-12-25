@@ -1,5 +1,3 @@
-starlette
-pydantic
 fastapi
 uvicorn
 minio
