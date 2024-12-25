@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from minio import Minio
 from config import *
 import json
+import io
 
 
 class MinioHandler:
@@ -60,7 +61,7 @@ class MinioHandler:
 
 
     def upload(self, key, value):
-        res = self.client.put_object(self.bucket_name, key, value)
+        res = self.client.fput_object(self.bucket_name, key, value)
         return res
 
     # def download(self, key, value):

@@ -1,7 +1,7 @@
-from fastapi import FastAPI, File, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile, Form
 from storage.handler import MinioHandler
-from pydantic import BaseModel
 from contextlib import asynccontextmanager
+from datetime import datetime
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -17,14 +17,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-class UploadFileRequest(BaseModel):
-    user: str
-    file: File
 
 @app.post("/upload/")
-async def upload_file(req: UploadFileRequest):
+def upload_file(file: UploadFile = File(...)):
     try:
-        res = minio_client.upload('test', req.file.filename, req.file.fileno())
+        key = f"{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}_{file.filename}"
+        res = minio_client.upload(key, file.file)
         return res
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to upload file: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
