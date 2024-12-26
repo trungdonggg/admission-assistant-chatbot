@@ -18,14 +18,12 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 
-@app.post("/upload/")
-def upload_file(file: UploadFile = File(...)):
+@app.post("/upload")
+async def upload_file(file: UploadFile):
     print(file.filename)
     print(file.file)
     print(file.content_type)
     print(type(file.file))
-    
-    file.file.seek(0)
     
     print(file.file.read(256))
     try:
