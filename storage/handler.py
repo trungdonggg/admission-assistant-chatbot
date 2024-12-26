@@ -62,10 +62,10 @@ class MinioHandler:
         res = self.client.put_object(self.bucket_name, key, value, -1, part_size=10*1024*1024)
         return res
 
-    # def download(self, key, value):
-    #     res = self.client.fget_object(self.bucket_name, key, value)
-    #     return res 
+    def download(self, key, value):
+        res = self.client.fget_object(self.bucket_name, key, value)
+        return res 
 
-    # def delete(self, keys):
-    #     self.client.remove_objects(self.bucket_name, keys)
-    #     return keys
+    def delete(self, keys):
+        self.client.remove_objects(self.bucket_name, keys)
+        return keys
