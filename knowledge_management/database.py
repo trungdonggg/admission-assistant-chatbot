@@ -13,6 +13,12 @@ documents = db["documents"]
 class Document:
     def __init__(self) -> None:
         pass
+
+    async def already_exists(self, name: str) -> bool:
+        if await documents.find_one({"name": name}):
+            return True
+        else:
+            return False
     
     async def get(self, name: str) -> Union[Dict, List]:
         if name:
@@ -57,11 +63,9 @@ class History:
     def __init__(self) -> None:
         pass
     
-    async def get(self, request) -> List:
-        user = request["user"]
-        
+    async def get(self, user: str) -> List:
         if not user:
-            return {"error": "User is required"}, 400
+            raise ValueError
         
         history = await history.find_one({"user": user})
         
@@ -73,12 +77,10 @@ class History:
         return history["history"]
 
 
-    async def post(self, request) -> str:
-        user = request["user"]
-        messages = request["messages"]
+    async def post(self, user: str, messages: List) -> str:
 
         if not user or not messages:
-            return ValueError
+            raise NameError
 
         await history.update_one(
             {"user": user},
@@ -88,8 +90,7 @@ class History:
 
         return user
     
-    async def delete(self, request) -> str:
-        user = request["user"]
+    async def delete(self, user: str) -> str:
         
         if not user:
             raise NameError

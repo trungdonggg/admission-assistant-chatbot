@@ -23,7 +23,10 @@ class MinioHandler:
    
     def upload(self, key, value) -> Dict:
         res = self.client.put_object(self.bucket_name, key, value, -1, part_size=10*1024*1024)
-        return res
+        return {
+            "bucket_name": self.bucket_name,
+            "object_name": res.object_name
+        }
 
     def download(self, key) -> bytes:
         res = self.client.get_object(self.bucket_name, key)
