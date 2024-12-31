@@ -1,7 +1,7 @@
 
 
 mongo_service=27017
-database_api_port=8000
+knowledge_management_api_port=8000
 
 
 weaviate_collection_name="development"
@@ -18,8 +18,6 @@ llm_api_port=5001
 
 textsplitter_api_port=5002
 
-classifier_api_port=5003
-
 processor_api_port=7000
 
 
@@ -34,4 +32,10 @@ embedding_api_host = server_226
 llm_api_host = local
 processor_api_host = local
 textsplitter_api_host = local
-classifier_api_host = local
+
+minio_access_key = "minio"
+minio_secret_key = "minio123"
+minio_bucket = "ttu-storage"
+minio_endpoint = "localhost:9000"
+minio_manager_port = 9001
+minio_port=9000

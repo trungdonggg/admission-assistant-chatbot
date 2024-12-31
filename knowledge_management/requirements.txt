@@ -1,0 +1,6 @@
+pymongo
+pydantic
+fastapi
+uvicorn
+typing
+minio

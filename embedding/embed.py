@@ -4,14 +4,14 @@ modelname = "dangvantuan/vietnamese-embedding"
 
 class Embedding:
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.embed_model = HuggingFaceEmbeddings(
             model_name="sentence-transformers/all-MiniLM-L6-v2",
             model_kwargs={"device": "cpu"},
             encode_kwargs={"normalize_embeddings": True}
         )
 
-    async def embed(self, content):
+    async def embed(self, content) -> list[list[float]]:
         if not content or not isinstance(content, list):
             return {"error": "Content must be a list of strings"}, 400
 

@@ -1,13 +1,19 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional, Dict
+from fastapi import UploadFile
+
+
 
 
 class AddDocumentRequestDatabase(BaseModel):
-    user: str
-    document_name: str
-    tag_name: str
-    content: str
-
+    file: UploadFile 
+    content: str 
+    owner: str
+    department: str 
+    description: str 
+    university: str 
+    addition: Optional[Dict] 
+    
 class AddChatHistoryRequestDatabase(BaseModel):
     user: str
     messages: List

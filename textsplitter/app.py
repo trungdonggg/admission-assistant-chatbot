@@ -18,8 +18,8 @@ class TextSplitResponse(BaseModel):
     chunks: List[str]
 
 
-@app.post("/splittext", response_model=TextSplitResponse)
-async def split_text(request: TextSplitRequest):
+@app.post("/splittext")
+async def split_text(request: TextSplitRequest) -> TextSplitResponse:
     try:
         text_splitter = RecursiveCharacterTextSplitter(
             separators=[
