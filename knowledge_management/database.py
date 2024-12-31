@@ -1,6 +1,6 @@
 from pymongo import AsyncMongoClient
 import config
-from typing import List
+from typing import List, Union, Dict
 
 
 client = AsyncMongoClient(host="localhost", port=config.mongo_service)
@@ -14,9 +14,7 @@ class Document:
     def __init__(self) -> None:
         pass
     
-    async def get(self, request) -> List:
-        name = request["name"]
-        
+    async def get(self, name: str) -> Union[Dict, List]:
         if name:
             document = await documents.find_one({"name": name})
             if document:
@@ -35,7 +33,7 @@ class Document:
                 
             return document_list
 
-    async def post(self, request) -> str:
+    async def post(self, request: Dict) -> str:
         name = request["name"]
         
         if await documents.find_one({"name": name}):
@@ -45,9 +43,7 @@ class Document:
         return name
 
 
-    async def delete(self, request) -> str:
-        name = request["name"]
-        
+    async def delete(self, name: str) -> str:
         if not name:
             raise NameError
         

@@ -1,7 +1,7 @@
 
 
 mongo_service=27017
-database_api_port=8000
+knowledge_management_api_port=8000
 
 
 weaviate_collection_name="development"
@@ -39,5 +39,3 @@ minio_bucket = "ttu-storage"
 minio_endpoint = "localhost:9000"
 minio_manager_port = 9001
 minio_port=9000
-
-minio_api_port=9002

@@ -1,9 +1,9 @@
 from minio import Minio
 from config import *
-
+from typing import Dict
 
 class MinioHandler:
-    def __init__(self):
+    def __init__(self) -> None:
         self.minio_url = minio_endpoint
         self.access_key = minio_access_key
         self.secret_key = minio_secret_key
@@ -15,56 +15,20 @@ class MinioHandler:
             secure=False,
         )
         self.make_bucket()
-        # self.set_policy()
-        
 
-    def make_bucket(self):
+    def make_bucket(self) -> str:
         if not self.client.bucket_exists(self.bucket_name):
             self.client.make_bucket(self.bucket_name)
         return self.bucket_name
-    
-    # def set_policy(self):
-    #     policy = {
-    #         "Version": "2012-10-17",
-    #         "Statement": [
-    #             {
-    #                 "Effect": "Allow",
-    #                 "Principal": {
-    #                     "AWS": ["*"]
-    #                 },
-    #                 "Action": [
-    #                     "s3:GetBucketLocation",
-    #                     "s3:ListBucket"
-    #                 ],
-    #                 "Resource": [
-    #                     f"arn:aws:s3:::{self.bucket_name}"
-    #                 ]
-    #             },
-    #             {
-    #                 "Effect": "Allow",
-    #                 "Principal": {
-    #                     "AWS": ["*"]
-    #                 },
-    #                 "Action": [
-    #                     "s3:GetObject"
-    #                 ],
-    #                 "Resource": [
-    #                     f"arn:aws:s3:::{self.bucket_name}/*"
-    #                 ]
-    #             }
-    #         ]
-    #     }
-    #     self.client.set_bucket_policy(self.bucket_name, json.dumps(policy))
-
-
-    def upload(self, key, value):
+   
+    def upload(self, key, value) -> Dict:
         res = self.client.put_object(self.bucket_name, key, value, -1, part_size=10*1024*1024)
         return res
 
-    def download(self, key):
+    def download(self, key) -> bytes:
         res = self.client.get_object(self.bucket_name, key)
         return res.read()
 
-    def delete(self, key):
+    def delete(self, key) -> str:
         self.client.remove_object(self.bucket_name, key)
         return key
