@@ -1,8 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Response
 from llm.utils import *
-from llm.chat_template import ChatTemplate
 from llm.generator import Generator
+from typing import List
+from pydantic import BaseModel
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -11,6 +12,14 @@ logger = logging.getLogger(__name__)
 
 bot: Generator = None
 
+
+class ChatTemplate(BaseModel):
+    history: List = []
+    context: str = ""
+    input: str
+    
+    
+    
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global bot

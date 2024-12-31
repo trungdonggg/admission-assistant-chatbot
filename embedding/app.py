@@ -27,8 +27,8 @@ class EmbeddingResponse(BaseModel):
     vectors: list[list[float]]
     
     
-@app.post("/vectorize", response_model=EmbeddingResponse)
-async def generate_response(request: EmbeddingRequest):
+@app.post("/vectorize")
+async def generate_response(request: EmbeddingRequest) -> EmbeddingResponse:
     try:
         response = await embedder.embed(request.content)
         return EmbeddingResponse(vectors=response)

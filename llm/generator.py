@@ -1,6 +1,13 @@
 from llm.utils import *
-from llm.chat_template import ChatTemplate
+from pydantic import BaseModel
+from typing import List
 
+class ChatTemplate(BaseModel):
+    history: List = []
+    context: str = ""
+    input: str
+    
+    
 class Generator:
     def __init__(self):
         self.model = get_model()

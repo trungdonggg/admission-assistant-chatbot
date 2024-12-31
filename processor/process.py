@@ -6,56 +6,6 @@ class Processor:
     def __init__(self):
         pass
 
-    async def add_document(self, request: AddDocument):
-        user = request.user
-        document_name = request.document_name
-        tag_name = request.tag_name
-        document_content = request.document_content
-
-        try:
-            await add_document_to_db(
-                AddDocumentRequestDatabase(
-                    user=user,
-                    document_name=document_name,
-                    tag_name=tag_name,
-                    content=document_content,
-                )
-            )
-            print("document added to db")
-
-            text_chunks = await split_document(content=document_content)
-            text_chunks_with_tagname = [tag_name + ":" + sencense for sencense in text_chunks]
-            print("text chunked")
-            
-            
-            vectors = await vectorize(
-                VectorizeRequest(
-                    content=text_chunks_with_tagname
-                )
-            )
-            print("vectors generated")
-            
-            await add_document_to_vectordb(
-                CreateDocumentRequestVectorDatabase(
-                    document_name=document_name,
-                    tag_name=tag_name,
-                    chunks=text_chunks_with_tagname,
-                    vectors=vectors
-                )
-            )
-            print("document added to vectordb")
-            
-        except Exception as e:
-            await self.delete_document(document_name)
-            raise Exception(f"Error in adding document: {str(e)}")
-
-
-    async def delete_document(self, document_name: str):
-        await remove_document_from_db(document_name)
-        print("document removed from db")
-        await remove_document_from_vectordb(document_name)
-        print("document removed from vectordb")
-
 
     async def search(self, request: SearchRequest):
         user = request.user

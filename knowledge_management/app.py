@@ -5,6 +5,7 @@ from storage import MinioHandler
 from fastapi import FastAPI, HTTPException, UploadFile, Form, File
 from contextlib import asynccontextmanager
 import logging
+from utils import *
 
 
 logging.basicConfig(level=logging.INFO)
@@ -27,8 +28,8 @@ class DocumentMetadata(BaseModel):
     
 
 class AddChatHistoryRequest(BaseModel):
-    user: str
-    messages: List
+    user: str = Field(..., description="User name")
+    messages: List = Field(..., description="List of messages to add to history")
     
     
 
@@ -63,6 +64,7 @@ async def add_document(
             raise HTTPException(status_code=400, detail="Document already exists")
 
         res = minioClient.upload(file.filename, file.file)
+        print('Document uploaded to Minio')
 
         data = DocumentMetadata(
                 name=file.filename,
@@ -77,15 +79,33 @@ async def add_document(
                 minio=res,
             ).model_dump()
         
-        try:
-            await doc.post(data)
-        except Exception as e:
-            minioClient.delete(file.filename)
-
+        await doc.post(data)
         data.pop("_id", None)
+        print('Document added to database')
+        
+        chunks = await split_document(content)
+        print('Text chunked')
+        
+        vectors = await vectorize(chunks)
+        print('Vectors generated')
+        
+        await add_document_to_vectordb(
+            AddDocumentRequestVectorDatabase(
+                document_name=file.filename,
+                chunks=chunks,
+                vectors=vectors,
+                metadata=data
+            )
+        )
+        print('Document added to vector database')
+
         return data
 
     except Exception as e:
+        minioClient.delete(file.filename)
+        await doc.delete(file.filename)
+        await remove_document_from_vectordb(file.filename)
+        
         logger.error(f"Error in adding document: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -104,7 +124,12 @@ async def add_document(
 async def delete_document(document_name: str) -> Dict:
     try:
         minioClient.delete(document_name)
+        print('Document deleted from Minio')
         await doc.delete(document_name)
+        print('Document deleted from database')
+        await remove_document_from_vectordb(document_name)
+        print('Document deleted from vector database')
+        
         return {"deleted": document_name}
     except Exception as e:
         logger.error(f"Error in deleting document: {str(e)}", exc_info=True)

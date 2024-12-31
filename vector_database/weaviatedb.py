@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 import weaviate
 import weaviate.classes as wvc
 from weaviate.classes.data import DataObject
@@ -10,7 +10,7 @@ import config
 
 
 class WeaviateDB:
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = weaviate.WeaviateAsyncClient(
             connection_params=ConnectionParams.from_params(
                 http_host=config.weaviate_host,
@@ -22,33 +22,33 @@ class WeaviateDB:
             )
         )
 
-    async def connect(self):
+    async def connect(self) -> None:
         await self.client.connect()
         logging.info("Connected to Weaviate")
 
-    async def create_collection(self, collection_name: str):
+    async def create_collection(self, collection_name: str) -> None:
         await self.client.collections.create(
             name=collection_name,
             vectorizer_config=wvc.config.Configure.Vectorizer.none(),
         )
         logging.info(f"Collection '{collection_name}' created")
 
-    async def delete_collection(self, collection_name: str):
+    async def delete_collection(self, collection_name: str) -> None:
         await self.client.collections.delete(collection_name)
         logging.info(f"Collection '{collection_name}' deleted")
 
     def get_collection(self, collection_name: str) -> CollectionAsync:
         return self.client.collections.get(name=collection_name)
 
-    async def add_document(self, collection_name: str, document_name: str, tag_name: str, chunks: List[str], vectors: List[List[float]]):
+    async def add_document(self, collection_name: str, document_name: str, chunks: List[str], vectors: List[List[float]], metadata: Dict) -> List:
         collection = self.get_collection(collection_name)
         data_objects = [
             DataObject(
                 properties={
                     "collection_name": collection_name,
                     "document_name": document_name,
-                    "tag_name": tag_name,
                     "chunk": chunk,
+                    "metadata": metadata
                 },
                 vector=vector
             )
@@ -63,7 +63,7 @@ class WeaviateDB:
         )
         return response
 
-    async def query(self, collection_name: str, vector: List[float], content: str, limit: int = 10):
+    async def query(self, collection_name: str, vector: List[float], content: str, limit: int = 10) -> List:
         collection = self.get_collection(collection_name)
         response = await collection.query.hybrid(
             query=content,
@@ -75,7 +75,7 @@ class WeaviateDB:
         print(response.objects)
         return response.objects
     
-    async def close_connection(self):
+    async def close_connection(self) -> None:
         await self.client.close()
         logging.info("Disconnected from Weaviate")
 
