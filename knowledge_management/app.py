@@ -1,6 +1,6 @@
-from pydantic import BaseModel
-from typing import List
-from mongo import ChatHistory, Documents
+from pydantic import BaseModel, Field
+from typing import List, Optional
+from knowledge_management.database import ChatHistory, Document
 from fastapi import FastAPI, HTTPException
 from contextlib import asynccontextmanager
 import logging
@@ -9,10 +9,34 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class AddDocumentRequest(BaseModel):
-    user: str
-    document_name: str
-    tag_name: str
-    content: str
+    name: str = Field(..., description="Name of the file")
+    content: str = Field(..., description="Content of the file (could be a placeholder for now)")
+    type: str = Field(..., description="Type or format of the file (e.g., pdf, doc, txt)")
+    size: str = Field(..., description="Size of the file (e.g., in bytes or human-readable format)")
+    url: str = Field(..., description="URL to access the file")
+    owner: str = Field(..., description="Owner of the file")
+    department: str = Field(..., description="Department associated with the file")
+    description: str = Field(..., description="Description of the file")
+    university: str = Field(..., description="University associated with the file")
+    addition: Optional[dict] = Field(None, description="Additional information about the file (if any)")
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "Example File",
+                "content": "This is a placeholder content",
+                "type": "pdf",
+                "size": "2MB",
+                "url": "http://example.com/file.pdf",
+                "owner": "John Doe",
+                "department": "Computer Science",
+                "description": "Project report for CS101",
+                "university": "Example University",
+                "addition": {
+                    "tags": ["report", "project", "CS101"]
+                }
+            }
+        }
 
 class AddChatHistoryRequest(BaseModel):
     user: str

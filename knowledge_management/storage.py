@@ -1,19 +1,6 @@
 from minio import Minio
 from config import *
-import json
 
-# {
-#   "id": "123e4567-e89b-12d3-a456-426614174000",
-#   "file_name": "example.pdf",
-#   "file_type": "application/pdf",
-#   "file_size": 1048576,
-#   "file_path": "https://yourbucket.s3.amazonaws.com/uploads/example.pdf",
-#   "uploaded_by": "user_789",
-#   "uploaded_at": "2024-12-30T12:00:00Z",
-#   "metadata": {
-#     "post_id": "post_123"
-#   }
-# }
 
 class MinioHandler:
     def __init__(self):
