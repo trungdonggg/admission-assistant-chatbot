@@ -36,7 +36,9 @@ async def split_document(content: str) -> List[str]:
 async def vectorize(request: List[str]) -> List[List[float]]:
     url = f"http://{embedding_api_host}:{embedding_api_port}/vectorize"
     
-    payload = request.model_dump()
+    payload = {
+        "content": request
+    }
 
     headers = {
         'Content-Type': 'application/json'

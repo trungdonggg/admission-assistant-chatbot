@@ -25,7 +25,8 @@ class MinioHandler:
         res = self.client.put_object(self.bucket_name, key, value, -1, part_size=10*1024*1024)
         return {
             "bucket_name": self.bucket_name,
-            "object_name": res.object_name
+            "object_name": res.object_name,
+            "etag": res.etag,
         }
 
     def download(self, key: str) -> bytes:

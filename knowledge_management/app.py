@@ -3,9 +3,11 @@ from typing import List, Optional, Dict
 from database import History, Document
 from storage import MinioHandler
 from fastapi import FastAPI, HTTPException, UploadFile, Form, File
+from fastapi.responses import FileResponse, StreamingResponse
 from contextlib import asynccontextmanager
 import logging
 from utils import *
+from io import BytesIO
 
 
 logging.basicConfig(level=logging.INFO)
@@ -57,7 +59,7 @@ async def add_document(
     department: str = Form(...),
     description: str = Form(...),
     university: str = Form(...),
-    addition: Optional[Dict] = Form(None)
+    addition: Optional[Dict] = Form(None),
 ) -> Dict:
     try:
         if await doc.already_exists(file.filename):
@@ -89,6 +91,8 @@ async def add_document(
         vectors = await vectorize(chunks)
         print('Vectors generated')
         
+        if not addition:
+            data.pop("addition", None)
         await add_document_to_vectordb(
             AddDocumentRequestVectorDatabase(
                 document_name=file.filename,
@@ -102,7 +106,7 @@ async def add_document(
         return data
 
     except Exception as e:
-        minioClient.delete(file.filename)
+        minioClient.delete(res['object_name'])
         await doc.delete(file.filename)
         await remove_document_from_vectordb(file.filename)
         
@@ -110,14 +114,28 @@ async def add_document(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# @app.get("/knowledge/document")
-# async def get_documents(document_name: str = None) -> Dict:
-#     try:
-#         return await doc.get(document_name)
-#     except Exception as e:
-#         logger.error(f"Error in getting documents: {str(e)}", exc_info=True)
-#         raise HTTPException(status_code=500, detail=str(e))
-    
+@app.get("/knowledge/documents/document-info")
+async def get_documents(document_name: str = None) -> Dict:
+    try:
+        res = await doc.get_document(document_name)
+        return {
+            "documents": res
+        }
+    except Exception as e:
+        logger.error(f"Error in getting documents: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/knowledge/documents/user")
+async def get_user_documents(user: str) -> Dict:
+    try:
+        res = await doc.get_user_documents(user)
+        return {
+            "user": res
+        }
+    except Exception as e:
+        logger.error(f"Error in getting documents: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/knowledge/documents")
@@ -135,7 +153,27 @@ async def delete_document(document_name: str) -> Dict:
         logger.error(f"Error in deleting document: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
     
-    
+
+@app.get("/knowledge/documents/download")
+async def download_document(document_name: str) -> FileResponse:
+    print(f"Downloading document: {document_name}")
+    try:
+        pdf_stream = BytesIO(minioClient.download(document_name))
+        #print(f'Document downloaded from Minio: {pdf_stream}')
+        # Create a StreamingResponse to send the PDF as a downloadable file
+        response = StreamingResponse(
+            pdf_stream,
+            media_type="application/pdf",
+        )
+        #print(f'Response created: {response}')
+        response.headers["Content-Disposition"] = "attachment; filename=downloaded_file.pdf"
+
+        return response
+
+    except Exception as e:
+        logger.error(f"Error in downloading document: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+
     
 
 

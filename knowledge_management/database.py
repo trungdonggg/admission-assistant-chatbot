@@ -13,19 +13,19 @@ documents = db["documents"]
 class Document:
     def __init__(self) -> None:
         pass
-
+    
     async def already_exists(self, name: str) -> bool:
         if await documents.find_one({"name": name}):
             return True
         else:
             return False
     
-    async def get(self, name: str) -> Union[Dict, List]:
+    async def get_document(self, name: str | None) -> List:
         if name:
             document = await documents.find_one({"name": name})
             if document:
                 document["_id"] = str(document["_id"])
-                return document
+                return [document]
             else:
                 raise NameError
 
@@ -38,6 +38,22 @@ class Document:
                 document_list.append(document)
                 
             return document_list
+        
+    
+    async def get_user_documents(self, user: str) -> List:
+        if not user:
+            raise NameError
+        
+        all_documents = await documents.find({"owner": user}).to_list(None)
+        
+        document_list = []
+
+        for document in all_documents:
+            document["_id"] = str(document["_id"])
+            document_list.append(document)
+                
+        return document_list
+
 
     async def post(self, request: Dict) -> str:
         name = request["name"]
