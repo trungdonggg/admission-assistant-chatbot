@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Literal
 from database import History, Document
 from storage import MinioHandler
 from fastapi import FastAPI, HTTPException, UploadFile, Form, File
@@ -13,7 +13,18 @@ from io import BytesIO
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
+categories = Literal[
+    "university_information",   # thong tin ve truong dai hoc
+    "sit_information",  # thong tin ve khoa ky thuat
+    "shl_information",  # thong tin ve khoa ngon ngu
+    "sbe_information",  # thong tin ve khoa kinh te
+    "med_information",  # thong tin ve khoa y 
+    "bio_information",  # thong tin ve khoa cong nghe sinh hoc
+    "nur_information",  # thong tin ve khoa dieu duong
+    "lib_information",  # thong tin ve khoa khai phong
+    "staff_information",    # thong tin ve giang vien
+    "research_information",     # thong tin ve nghien cuu
+]
 
 class DocumentMetadata(BaseModel):
     name: str = Field(..., description="Name of the file")
@@ -21,6 +32,7 @@ class DocumentMetadata(BaseModel):
     type: str = Field(..., description="Type of the file")
     content: str = Field(..., description="Content of the file in text format")
     owner: str = Field(..., description="Owner of the file")
+    category: categories = Field(..., description="Category of the file")
     department: str = Field(..., description="Department associated with the file")
     description: str = Field(..., description="Description of the file")
     university: str = Field(..., description="University associated with the file")
@@ -56,6 +68,7 @@ async def add_document(
     file: UploadFile = File(...), 
     content: str = Form(...),
     owner: str = Form(...),
+    category: categories = Form(...),
     department: str = Form(...),
     description: str = Form(...),
     university: str = Form(...),
@@ -74,6 +87,7 @@ async def add_document(
                 type=file.content_type,
                 content=content,
                 owner=owner,
+                category=category,
                 department=department,
                 description=description,
                 university=university,
@@ -158,15 +172,12 @@ async def delete_document(document_name: str) -> Dict:
 async def download_document(document_name: str) -> FileResponse:
     print(f"Downloading document: {document_name}")
     try:
-        pdf_stream = BytesIO(minioClient.download(document_name))
-        #print(f'Document downloaded from Minio: {pdf_stream}')
-        # Create a StreamingResponse to send the PDF as a downloadable file
+        data_stream = BytesIO(minioClient.download(document_name))
         response = StreamingResponse(
-            pdf_stream,
-            media_type="application/pdf",
+            content=data_stream,
+            media_type="application/octet-stream",
+            headers={"Content-Disposition": f"attachment; filename={document_name}"}
         )
-        #print(f'Response created: {response}')
-        response.headers["Content-Disposition"] = "attachment; filename=downloaded_file.pdf"
 
         return response
 
@@ -176,9 +187,6 @@ async def download_document(document_name: str) -> FileResponse:
 
     
 
-
-
-    
 @app.post("/knowledge/history")
 async def add_history(request: AddChatHistoryRequest) -> Dict:
     try:

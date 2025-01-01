@@ -1,6 +1,6 @@
 from pymongo import AsyncMongoClient
 import config
-from typing import List, Union, Dict
+from typing import List, Dict
 
 
 client = AsyncMongoClient(host="localhost", port=config.mongo_service)
