@@ -1,30 +1,19 @@
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Literal
-from database import History, Document
-from storage import MinioHandler
+from typing import List, Optional, Dict
+from knowledge_management.database import History, Document
+from knowledge_management.storage import MinioHandler
 from fastapi import FastAPI, HTTPException, UploadFile, Form, File
 from fastapi.responses import FileResponse, StreamingResponse
 from contextlib import asynccontextmanager
 import logging
-from utils import *
+from knowledge_management.utils import *
+import categry
 from io import BytesIO
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-categories = Literal[
-    "university_information",   # thong tin ve truong dai hoc
-    "sit_information",  # thong tin ve khoa ky thuat
-    "shl_information",  # thong tin ve khoa ngon ngu
-    "sbe_information",  # thong tin ve khoa kinh te
-    "med_information",  # thong tin ve khoa y 
-    "bio_information",  # thong tin ve khoa cong nghe sinh hoc
-    "nur_information",  # thong tin ve khoa dieu duong
-    "lib_information",  # thong tin ve khoa khai phong
-    "staff_information",    # thong tin ve giang vien
-    "research_information",     # thong tin ve nghien cuu
-]
 
 class DocumentMetadata(BaseModel):
     name: str = Field(..., description="Name of the file")
@@ -32,7 +21,7 @@ class DocumentMetadata(BaseModel):
     type: str = Field(..., description="Type of the file")
     content: str = Field(..., description="Content of the file in text format")
     owner: str = Field(..., description="Owner of the file")
-    category: categories = Field(..., description="Category of the file")
+    category: categry.categories = Field(..., description="Category of the file")
     department: str = Field(..., description="Department associated with the file")
     description: str = Field(..., description="Description of the file")
     university: str = Field(..., description="University associated with the file")
@@ -68,7 +57,7 @@ async def add_document(
     file: UploadFile = File(...), 
     content: str = Form(...),
     owner: str = Form(...),
-    category: categories = Form(...),
+    category: categry.categories = Form(...),
     department: str = Form(...),
     description: str = Form(...),
     university: str = Form(...),
@@ -108,11 +97,12 @@ async def add_document(
         if not addition:
             data.pop("addition", None)
         await add_document_to_vectordb(
-            AddDocumentRequestVectorDatabase(
+            AddDocumentToVectorDatabaseRequest(
+                collection_name=category,
                 document_name=file.filename,
                 chunks=chunks,
                 vectors=vectors,
-                metadata=data
+                metadata=data 
             )
         )
         print('Document added to vector database')

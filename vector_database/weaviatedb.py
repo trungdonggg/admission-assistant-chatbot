@@ -40,7 +40,15 @@ class WeaviateDB:
     def get_collection(self, collection_name: str) -> CollectionAsync:
         return self.client.collections.get(name=collection_name)
 
-    async def add_document(self, collection_name: str, document_name: str, chunks: List[str], vectors: List[List[float]], metadata: Dict[str, None]) -> List:
+    async def add_document(
+            self, 
+            collection_name: str, 
+            document_name: str, 
+            chunks: List[str], 
+            vectors: List[List[float]], 
+            metadata: Dict[str, None]
+            ) -> List:
+        
         collection = self.get_collection(collection_name)
         data_objects = [
             DataObject(
@@ -74,6 +82,7 @@ class WeaviateDB:
         )
         print(response.objects)
         return response.objects
+    
     
     async def close_connection(self) -> None:
         await self.client.close()
