@@ -122,9 +122,7 @@ async def add_document(
 async def get_documents(document_name: str = None) -> Dict:
     try:
         res = await doc.get_document(document_name)
-        return {
-            "documents": res
-        }
+        return {"documents": res}
     except Exception as e:
         logger.error(f"Error in getting documents: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -134,22 +132,20 @@ async def get_documents(document_name: str = None) -> Dict:
 async def get_user_documents(user: str) -> Dict:
     try:
         res = await doc.get_user_documents(user)
-        return {
-            "user": res
-        }
+        return {"user": res}
     except Exception as e:
         logger.error(f"Error in getting documents: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/knowledge/documents")
-async def delete_document(document_name: str) -> Dict:
+async def delete_document(collection_name: str, document_name: str) -> Dict:
     try:
         minioClient.delete(document_name)
         print('Document deleted from Minio')
         await doc.delete(document_name)
         print('Document deleted from database')
-        await remove_document_from_vectordb(document_name)
+        await remove_document_from_vectordb(collection_name, document_name)
         print('Document deleted from vector database')
         
         return {"deleted": document_name}
@@ -168,7 +164,6 @@ async def download_document(document_name: str) -> FileResponse:
             media_type="application/octet-stream",
             headers={"Content-Disposition": f"attachment; filename={document_name}"}
         )
-
         return response
 
     except Exception as e:
@@ -176,6 +171,14 @@ async def download_document(document_name: str) -> FileResponse:
         raise HTTPException(status_code=500, detail=str(e))
 
     
+
+
+
+
+
+
+
+
 
 @app.post("/knowledge/history")
 async def add_history(request: AddChatHistoryRequest) -> Dict:

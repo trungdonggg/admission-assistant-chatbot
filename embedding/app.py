@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from embed import Embedding
+from embedding.embed import Embedding
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 

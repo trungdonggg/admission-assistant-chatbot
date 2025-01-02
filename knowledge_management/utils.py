@@ -77,8 +77,8 @@ async def add_document_to_vectordb(request: AddDocumentToVectorDatabaseRequest):
 
 
 
-async def remove_document_from_vectordb(document_name: str):
-    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever?document_name={document_name}"
+async def remove_document_from_vectordb(collection_name: str, document_name: str):
+    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever?collection_name={collection_name}&document_name={document_name}"
     
     async with httpx.AsyncClient() as client:
         timeout = httpx.Timeout(connect=5.0, read=60.0, write=60.0, pool=10.0)

@@ -26,9 +26,6 @@ class QueryRequest(BaseModel):
     limit: int 
 
 
-class RemoveDocumentRequest(BaseModel):
-    collection_name: categry.categories
-    document_name: str
 
 
 weaviate_db: WeaviateDB = None
@@ -55,6 +52,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+
+
 @app.post("/retriever")
 async def add_document(doc: AddDocumentRequest) -> Dict:
     try:
@@ -63,7 +62,32 @@ async def add_document(doc: AddDocumentRequest) -> Dict:
     except Exception as e:
         logger.error(f"Error in adding document to weaviate: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/retriever/query")
+async def query(req: QueryRequest) -> Dict:
+    try:
+        response = await weaviate_db.query(**req.model_dump())
+        return {"query_results": response}
+    except Exception as e:
+        logger.error(f"Error in querying: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
     
+
+@app.delete("/retriever")
+async def delete_document(collection_name: str, document_name: str) -> Dict:
+    try:
+        response = await weaviate_db.remove_document(collection_name, document_name)
+        return {"message": "Document deleted successfully", "response": response}
+    except Exception as e:
+        logger.error(f"Error in retrieving: {str(e)}", exc_info=True)
+        return HTTPException(status_code=500, detail=str(e))
+
+
+
+
+
+
 
 # @app.post("/retriever/query")
 # async def query(req: QueryRequest) -> Dict:
@@ -78,25 +102,3 @@ async def add_document(doc: AddDocumentRequest) -> Dict:
 #     except Exception as e:
 #         logger.error(f"Error in querying: {str(e)}", exc_info=True)
 #         raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/retriever/query")
-async def query(req: QueryRequest) -> Dict:
-    try:
-        response = await weaviate_db.query(**req.model_dump())
-        return {"query_results": response}
-    except Exception as e:
-        logger.error(f"Error in querying: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
-    
-
-@app.delete("/retriever")
-async def delete_document(req: RemoveDocumentRequest) -> Dict:
-    try:
-        response = await weaviate_db.remove_document(**req.model_dump())
-        return {"message": "Document deleted successfully", "response": response}
-    except Exception as e:
-        logger.error(f"Error in retrieving: {str(e)}", exc_info=True)
-        return HTTPException(status_code=500, detail=str(e))
-
-# check delete request
