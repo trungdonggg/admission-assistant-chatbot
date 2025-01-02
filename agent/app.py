@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Response
-from llm.utils import *
-from llm.generator import Generator
+from agent.utils import *
+from agent.generator import Generator
 from typing import List
 from pydantic import BaseModel
 import logging

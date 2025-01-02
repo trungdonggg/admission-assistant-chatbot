@@ -1,4 +1,4 @@
-from llm.utils import *
+from agent.utils import *
 from pydantic import BaseModel
 from typing import List
 
@@ -14,8 +14,6 @@ class Generator:
 
     async def ainvoke(self, prompt_components: ChatTemplate):
         promt = await get_chatbot_prompt().ainvoke(prompt_components.model_dump())
-        print(promt)
-
         return await self.model.ainvoke(promt)
     
 
