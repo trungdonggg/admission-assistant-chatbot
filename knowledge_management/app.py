@@ -114,7 +114,7 @@ async def add_document(
     except Exception as e:
         minioClient.delete(res['object_name'])
         await doc.delete(file.filename)
-        await remove_document_from_vectordb(file.filename)
+        await remove_document_from_vectordb(category, file.filename)
         
         logger.error(f"Error in adding document: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
