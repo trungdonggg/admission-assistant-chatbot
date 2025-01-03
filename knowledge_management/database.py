@@ -83,14 +83,14 @@ class History:
         if not user:
             raise ValueError
         
-        history = await history.find_one({"user": user})
+        his = await history.find_one({"user": user})
         
-        if not history:
+        if not his:
             return []
         
-        history["_id"] = str(history["_id"])
+        his["_id"] = str(his["_id"])
         
-        return history["history"]
+        return his["history"]
 
 
     async def post(self, user: str, messages: List) -> str:
@@ -101,6 +101,19 @@ class History:
         await history.update_one(
             {"user": user},
             {"$push": {"history": {"$each": messages}}},
+            upsert=True
+        )
+
+        return user
+    
+    async def add_history_summary(self, user: str, summary: str) -> str:
+
+        if not user or not summary:
+            raise NameError
+
+        await history.update_one(
+            {"user": user},
+            {"$set": {"summary": summary}},
             upsert=True
         )
 

@@ -34,7 +34,9 @@ class AddChatHistoryRequest(BaseModel):
     user: str = Field(..., description="User name")
     messages: List = Field(..., description="List of messages to add to history")
     
-    
+class AddSummaryRequest(BaseModel):
+    user: str = Field(..., description="User name")
+    summary: str = Field(..., description="Summary of history")
 
 
 doc: Document = None
@@ -184,12 +186,20 @@ async def download_document(document_name: str) -> FileResponse:
 async def add_history(request: AddChatHistoryRequest) -> Dict:
     try:
         await history.post(**request.model_dump()) 
-        return {"added": request.user}
+        return {"history_added": request.user}
     except Exception as e:
         logger.error(f"Error in adding history: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-
+@app.post("/knowledge/history/summary")
+async def add_history(request: AddSummaryRequest) -> Dict:
+    try:
+        await history.add_history_summary(**request.model_dump()) 
+        return {"summary_added": request.user}
+    except Exception as e:
+        logger.error(f"Error in adding history: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
+    
 @app.get("/knowledge/history")
 async def get_history(user: str) -> Dict:
     try:
