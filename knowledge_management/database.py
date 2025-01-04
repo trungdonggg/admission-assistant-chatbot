@@ -79,18 +79,18 @@ class History:
     def __init__(self) -> None:
         pass
     
-    async def get(self, user: str) -> List:
+    async def get(self, user: str) -> Dict:
         if not user:
             raise ValueError
         
         his = await history.find_one({"user": user})
         
         if not his:
-            return []
+            return {"user": user, "history": [], "summary": ""}
         
-        his["_id"] = str(his["_id"])
+        his.pop("_id")
         
-        return his["history"]
+        return his
 
 
     async def post(self, user: str, messages: List) -> str:

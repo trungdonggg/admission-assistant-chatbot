@@ -43,7 +43,6 @@ def print_event(event: dict, _printed: set, max_length=1500):
             _printed.add(message.id)
 
 
-@tool
 async def query_vectordb(
         collection_name: Literal[
             "thong_tin_truong_dai_hoc",   # thông tin về trường đại học
@@ -62,30 +61,7 @@ async def query_vectordb(
         vector: List[float],
         limit: int,
     ) -> List:
-    """
-    Sends a query to a retriever API for retrieval and returns the results.
-
-    Args:
-        collection_name Literal[
-            "thong_tin_truong_dai_hoc",   # thông tin về trường đại học
-            "thong_tin_khoa_cong_nghe_thong_tin",  # thông tin về khoa công nghệ thông tin
-            "thong_tin_khoa_ngon_ngu",  # thông tin về khoa ngôn ngữ
-            "thong_tin_khoa_kinh_te",  # thông tin về khoa kinh tế
-            "thong_tin_khoa_y",  # thông tin về khoa y
-            "thong_tin_khoa_cong_nghe_sinh_hoc",  # thông tin về khoa công nghệ sinh học
-            "thong_tin_khoa_dieu_duong",  # thông tin về khoa điều dưỡng
-            "thong_tin_khoa_khai_phong",  # thông tin về khoa khai phóng
-            "thong_tin_giang_vien",    # thông tin về giảng viên
-            "thong_tin_nghien_cuu",     # thông tin về nghiên cứu
-            "thong_tin_chi_phi",     # thông tin về tất cả chi phí (học phí, nợ môn, thi lại, v.v.)
-        ]: the name of the collection to query.
-        content (str): The content to query.
-        vector (List[float]): The vector representation of the content.
-        limit (int): The maximum number of results to return.
-
-    Returns:
-        List: A list of results from the retriever API.
-    """
+ 
     url = "http://0.0.0.0:8081/retriever/query"
     
     payload = {
@@ -178,6 +154,25 @@ async def search_at_thong_tin_chi_phi(query: str, vector: List[float]) -> Dict:
     """
     return await query_vectordb(collection_name="thong_tin_chi_phi", content=query, vector=vector, limit=7)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @tool
 async def get_chat_history(user: str) -> List[str]:
     """
@@ -196,7 +191,7 @@ async def get_chat_history(user: str) -> List[str]:
         response = await client.get(url, timeout=timeout)
         response.raise_for_status()
 
-    return response.json().get("history")
+    return response.json()
 
 
 @tool
@@ -228,3 +223,7 @@ async def add_chat_history(user: str, messages: List[str]) -> Dict:
         response.raise_for_status()
     
     return response.json()
+
+# @tool
+# async def summarize_history(history: List[str]) -> str:
+#     pass

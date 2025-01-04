@@ -204,7 +204,7 @@ async def add_history(request: AddSummaryRequest) -> Dict:
 async def get_history(user: str) -> Dict:
     try:
         his = await history.get(user)
-        return {"history": his}
+        return his
     except Exception as e:
         logger.error(f"Error in getting history: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
