@@ -28,7 +28,6 @@ class QueryRequest(BaseModel):
 
 
 
-weaviate_db: WeaviateDB = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

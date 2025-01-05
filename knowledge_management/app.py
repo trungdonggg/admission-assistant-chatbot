@@ -36,10 +36,6 @@ class AddChatHistoryRequest(BaseModel):
     summary: str = Field(..., description="Summary of history")
     
 
-doc: Document = None
-history: History = None
-minioClient: MinioHandler = None
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global doc, history, minioClient

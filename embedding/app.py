@@ -9,7 +9,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-embedder: Embedding = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
