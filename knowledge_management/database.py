@@ -93,7 +93,7 @@ class History:
         return his
 
 
-    async def post(self, user: str, messages: List) -> str:
+    async def post(self, user: str, messages: List, summary: str) -> str:
 
         if not user or not messages:
             raise NameError
@@ -101,23 +101,13 @@ class History:
         await history.update_one(
             {"user": user},
             {"$push": {"history": {"$each": messages}}},
+            {"$set": {"summary": summary}},
+
             upsert=True
         )
 
         return user
     
-    async def add_history_summary(self, user: str, summary: str) -> str:
-
-        if not user or not summary:
-            raise NameError
-
-        await history.update_one(
-            {"user": user},
-            {"$set": {"summary": summary}},
-            upsert=True
-        )
-
-        return user
     
     async def delete(self, user: str) -> str:
         

@@ -1,62 +1,15 @@
-from langchain_core.tools import tool
+from typing_extensions import TypedDict
 import httpx
-from typing import List, Dict
-from langchain_core.messages import ToolMessage
-from langchain_core.runnables import RunnableLambda
-from langgraph.prebuilt import ToolNode
+from typing import List, Dict, Any, Union, Annotated
 from typing import Literal
-
-
-def handle_tool_error(state) -> dict:
-    error = state.get("error")
-    tool_calls = state["messages"][-1].tool_calls
-    return {
-        "messages": [
-            ToolMessage(
-                content=f"Error: {repr(error)}\n please fix your mistakes.",
-                tool_call_id=tc["id"],
-            )
-            for tc in tool_calls
-        ]
-    }
-
-
-def create_tool_node_with_fallback(tools: list) -> dict:
-    return ToolNode(tools).with_fallbacks(
-        [RunnableLambda(handle_tool_error)], exception_key="error"
-    )
-
-
-def print_event(event: dict, _printed: set, max_length=1500):
-    current_state = event.get("dialog_state")
-    if current_state:
-        print("Currently in: ", current_state[-1])
-    message = event.get("messages")
-    if message:
-        if isinstance(message, list):
-            message = message[-1]
-        if message.id not in _printed:
-            msg_repr = message.pretty_repr(html=True)
-            if len(msg_repr) > max_length:
-                msg_repr = msg_repr[:max_length] + " ... (truncated)"
-            print(msg_repr)
-            _printed.add(message.id)
+from categry import *
+from pydantic import BaseModel
+from langgraph.graph.message import add_messages, AnyMessage
+from langchain_core.language_models.chat_models import BaseChatModel
 
 
 async def query_vectordb(
-        collection_name: Literal[
-            "thong_tin_truong_dai_hoc",   # thông tin về trường đại học
-            "thong_tin_khoa_cong_nghe_thong_tin",  # thông tin về khoa công nghệ thông tin
-            "thong_tin_khoa_ngon_ngu",  # thông tin về khoa ngôn ngữ
-            "thong_tin_khoa_kinh_te",  # thông tin về khoa kinh tế
-            "thong_tin_khoa_y",  # thông tin về khoa y
-            "thong_tin_khoa_cong_nghe_sinh_hoc",  # thông tin về khoa công nghệ sinh học
-            "thong_tin_khoa_dieu_duong",  # thông tin về khoa điều dưỡng
-            "thong_tin_khoa_khai_phong",  # thông tin về khoa khai phóng
-            "thong_tin_giang_vien",    # thông tin về giảng viên
-            "thong_tin_nghien_cuu",     # thông tin về nghiên cứu
-            "thong_tin_chi_phi",     # thông tin về tất cả chi phí (học phí, nợ môn, thi lại, v.v.)
-        ],
+        collection_name: categories,
         content: str,
         vector: List[float],
         limit: int,
@@ -83,22 +36,10 @@ async def query_vectordb(
     return response.json().get("query_results")
 
 
-
-@tool
 async def vectorize(content: str) -> List[List[float]]:
-    """
-    Sends a query to an embedding API for vectorization and retrieves their vector representations.
-
-    Args:
-        content (str): A query to be vectorized.
-
-    Returns:
-        List[List[float]]: A list of vector representations for the input content.
-    """
     url = "http://128.214.255.226:5000/vectorize"
     
-    payload = {
-        "content": [content]}
+    payload = {"content": [content]}
 
     headers = {
         'Content-Type': 'application/json'
@@ -112,22 +53,51 @@ async def vectorize(content: str) -> List[List[float]]:
     return response.json().get("vectors")
 
 
-@tool
-async def search_at_thong_tin_truong_dai_hoc(query: str, vector: List[float]) -> Dict:
+def router(
+    state: Union[list[AnyMessage], dict[str, Any], BaseModel],
+    messages_key: str = "messages",
+) -> Literal["tools", "summarizer"]:
+
+    if isinstance(state, list):
+        ai_message = state[-1]
+    elif isinstance(state, dict) and (messages := state.get(messages_key, [])):
+        ai_message = messages[-1]
+    elif messages := getattr(state, messages_key, []):
+        ai_message = messages[-1]
+    else:
+        raise ValueError(f"No messages found in input state to tool_edge: {state}")
+    if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
+        return "tools"
+    return "summarizer"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async def search_at_thong_tin_truong_dai_hoc(query: str) -> str:
     """
     Search for relevant documents in the "thong_tin_truong_dai_hoc" collection using a query string and a vector.
 
     Args:
         query (str): The textual query to search for within the collection.
-        vector (List[float]): The vector representation of the query for vector-based search.
 
     Returns:
-        Dict: The search results retrieved from the vector database, containing relevant documents.
+        str: The search results retrieved from the vector database, containing relevant documents.
     """
+    vector = await vectorize(query)
     return await query_vectordb(collection_name="thong_tin_truong_dai_hoc", content=query, vector=vector, limit=7)
 
-@tool
-async def search_at_thong_tin_khoa_cong_nghe_thong_tin(query: str, vector: List[float]) -> Dict:
+async def search_at_thong_tin_khoa_cong_nghe_thong_tin(query: str, vector: List[float]) -> str:
     """
     Search for relevant documents in the "thong_tin_khoa_cong_nghe_thong_tin" collection using a query string and a vector.
 
@@ -136,11 +106,11 @@ async def search_at_thong_tin_khoa_cong_nghe_thong_tin(query: str, vector: List[
         vector (List[float]): The vector representation of the query for vector-based search.
 
     Returns:
-        Dict: The search results retrieved from the vector database, containing relevant documents.
+        str: The search results retrieved from the vector database, containing relevant documents.
     """
+    vector = await vectorize(query)
     return await query_vectordb(collection_name="thong_tin_khoa_cong_nghe_thong_tin", content=query, vector=vector, limit=7)
     
-@tool
 async def search_at_thong_tin_chi_phi(query: str, vector: List[float]) -> Dict:
     """
     Search for relevant documents in the "thong_tin_chi_phi" collection using a query string and a vector.
@@ -150,8 +120,9 @@ async def search_at_thong_tin_chi_phi(query: str, vector: List[float]) -> Dict:
         vector (List[float]): The vector representation of the query for vector-based search.
 
     Returns:
-        Dict: The search results retrieved from the vector database, containing relevant documents.
+        str: The search results retrieved from the vector database, containing relevant documents.
     """
+    vector = await vectorize(query)
     return await query_vectordb(collection_name="thong_tin_chi_phi", content=query, vector=vector, limit=7)
 
 
@@ -165,25 +136,13 @@ async def search_at_thong_tin_chi_phi(query: str, vector: List[float]) -> Dict:
 
 
 
+class State(TypedDict):
+    messages: Annotated[list[AnyMessage], add_messages]
+    summary: str
+    user: str
 
-
-
-
-
-
-
-
-@tool
-async def get_chat_history(user: str) -> List[str]:
-    """
-    Retrieve the chat history for a specific user.
-
-    Args:
-        user (str): The user for whom the chat history is to be retrieved.
-
-    Returns:
-        List[str]: The chat history for the specified user.
-    """
+async def get_chat_history(state: State) -> List[str]:
+    user = state["user"]
     url = f"http://0.0.0.0:8000/knowledge/history?user={user}"
     
     async with httpx.AsyncClient() as client:
@@ -191,26 +150,32 @@ async def get_chat_history(user: str) -> List[str]:
         response = await client.get(url, timeout=timeout)
         response.raise_for_status()
 
-    return response.json()
+    return {
+        "summary": response.json().get("summary"),
+    }
 
 
-@tool
-async def add_chat_history(user: str, messages: List[str]) -> Dict:
-    """
-    Add chat history to the database.
-
-    Args:
-        user (str): The user for whom the chat history is to be added.
-        messages (List[str]): The list of messages to be added to the chat history.
-
-    Returns:
-        Dict: The response from the database.
-    """
+async def add_chat_history(state: State, llm: BaseChatModel) -> None:
     url = "http://0.0.0.0:8000/knowledge/history"
+
+    while True:
+        summary = await llm.ainvoke(
+                f"Using the previous summary: '{state['summary']}' and the conversation between the user and the assistant, "
+                f"which includes: \nUser: {state['messages'][0].content}\nAssistant: {state['messages'][-1].content}\n"
+                "provide a concise summary of the interaction."
+            )
+        if not summary.tool_calls and (
+            not summary.content
+            or isinstance(summary.content, list) and not summary.content[0].get("text")
+        ):
+            state["messages"].append(("user", "Respond with a real output."))
+        else:
+            break
     
     payload = {
-        "user": user,
-        "messages": messages
+        "user": state["user"],
+        "messages": [state["messages"][0], state["messages"][-1]],
+        "summary": summary
     }
     
     headers = {
@@ -222,8 +187,5 @@ async def add_chat_history(user: str, messages: List[str]) -> Dict:
         response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
     
-    return response.json()
 
-# @tool
-# async def summarize_history(history: List[str]) -> str:
-#     pass
+
