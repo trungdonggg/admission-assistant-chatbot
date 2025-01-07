@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
+        model="gemini-1.5-pro",
         google_api_key=os.getenv("GOOGLE_AI_API_KEY"),
     )
 
@@ -43,13 +43,10 @@ async def search(request: SearchRequest):
             "user": request.user
             })
         
-        print(res)
-        return res
-        
-        # return {
-        #     "user": request.user,
-        #     "response": res["messages"][-1].content
-        # }
+        return {
+            "user": request.user,
+            "response": res["messages"][-1].content
+        }
 
     except Exception as e:
         logger.error(f"Error in searching: {str(e)}", exc_info=True)

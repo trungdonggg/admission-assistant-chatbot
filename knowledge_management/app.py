@@ -79,7 +79,7 @@ async def add_document(
                 university=university,
                 addition=addition,
                 minio=res,
-                url=f'http://{knowledge_management_api_host}:9001/' + res['object_name']
+                url=f'The address of frontend section to preview the file.'
             ).model_dump()
         
         await doc.post(data)
@@ -92,6 +92,9 @@ async def add_document(
         vectors = await vectorize(chunks)
         print('Vectors generated')
         
+        keys_to_remove = ["content", "size", "type", "owner", "minio", "department", "university"]
+        for key in keys_to_remove:
+            data.pop(key, None)
         if not addition:
             data.pop("addition", None)
         await add_document_to_vectordb(
@@ -105,7 +108,7 @@ async def add_document(
         )
         print('Document added to vector database')
 
-        return data
+        return {"response": "Document added successfully"}
 
     except Exception as e:
         minioClient.delete(res['object_name'])

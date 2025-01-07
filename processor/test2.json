@@ -1,0 +1,123 @@
+{
+    "user": "dong",
+    "messages": [
+      {
+        "content": "dia chi cua truong",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "human",
+        "name": null,
+        "id": "dae98900-3e0d-4da3-8ede-96d87af508b2",
+        "example": false
+      },
+      {
+        "content": "",
+        "additional_kwargs": {
+          "function_call": {
+            "name": "search_at_thong_tin_truong_dai_hoc",
+            "arguments": "{\"query\": \"\\u0111\\u1ecba ch\\u1ec9 c\\u1ee7a tr\\u01b0\\u1eddng \\u0111\\u1ea1i h\\u1ecdc b\\u00e1ch khoa\"}"
+          }
+        },
+        "response_metadata": {
+          "prompt_feedback": {
+            "block_reason": 0,
+            "safety_ratings": []
+          },
+          "finish_reason": "STOP",
+          "safety_ratings": []
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-6466997d-06fd-419e-92cd-2a1447254df3-0",
+        "example": false,
+        "tool_calls": [
+          {
+            "name": "search_at_thong_tin_truong_dai_hoc",
+            "args": {
+              "query": "địa chỉ của trường đại học bách khoa"
+            },
+            "id": "be750235-5b36-44e7-85b3-3ed1cb2a5cb5",
+            "type": "tool_call"
+          }
+        ],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 430,
+          "output_tokens": 25,
+          "total_tokens": 455,
+          "input_token_details": {
+            "cache_read": 0
+          }
+        }
+      },
+      {
+        "content": "[{\"collection_name\": \"thong_tin_truong_dai_hoc\", \"document_name\": \"Tutorial_EDIT.pdf\", \"metadata\": {\"name\": \"Tutorial_EDIT.pdf\", \"description\": \"description123\", \"url\": \"http://192.168.80.166:9001/Tutorial_EDIT.pdf\", \"category\": \"thong_tin_truong_dai_hoc\"}, \"chunk\": \". Từ đó, 27 tháng 10 được chọn là ngày thành lập Trường Đại học Bách khoa. Năm 1978, Khoa Địa chất được thành lập.\"}, {\"collection_name\": \"thong_tin_truong_dai_hoc\", \"document_name\": \"Tutorial_EDIT.pdf\", \"metadata\": {\"category\": \"thong_tin_truong_dai_hoc\", \"description\": \"description123\", \"url\": \"http://192.168.80.166:9001/Tutorial_EDIT.pdf\", \"name\": \"Tutorial_EDIT.pdf\"}, \"chunk\": \"Năm 1996, Trường Đại học Bách khoa chính thức trở thành thành viên của Đại học Quốc gia Thành phố Hồ Chí Minh và đổi lại tên thành Trường Đại học Kỹ thuật\"}, {\"collection_name\": \"thong_tin_truong_dai_hoc\", \"document_name\": \"Tutorial_EDIT.pdf\", \"metadata\": {\"name\": \"Tutorial_EDIT.pdf\", \"description\": \"description123\", \"url\": \"http://192.168.80.166:9001/Tutorial_EDIT.pdf\", \"category\": \"thong_tin_truong_dai_hoc\"}, \"chunk\": \"Năm 2005, Trường Đại học Bách khoa được Chính phủ trao tặng danh hiệu \\\"Anh hùng Lao động trong thời kỳ đổi mới\\\" Năm 2007, Trường Đại học Bách khoa được Chính phủ trao tặng \\\"Huân chương độc lập\\\".\"}, {\"collection_name\": \"thong_tin_truong_dai_hoc\", \"document_name\": \"Tutorial_EDIT.pdf\", \"metadata\": {\"name\": \"Tutorial_EDIT.pdf\", \"description\": \"description123\", \"url\": \"http://192.168.80.166:9001/Tutorial_EDIT.pdf\", \"category\": \"thong_tin_truong_dai_hoc\"}, \"chunk\": \". Năm 1973, Học viện Quốc gia Kỹ thuật bị giải tán, trường được đổi tên Trường Đại học Kỹ thuật và là thành viên của Viện Đại học Bách khoa Thủ Đức.\"}, {\"collection_name\": \"thong_tin_truong_dai_hoc\", \"document_name\": \"Tutorial_EDIT.pdf\", \"metadata\": {\"name\": \"Tutorial_EDIT.pdf\", \"description\": \"description123\", \"url\": \"http://192.168.80.166:9001/Tutorial_EDIT.pdf\", \"category\": \"thong_tin_truong_dai_hoc\"}, \"chunk\": \"Trường Đại học Bách khoa (tiếng Anh: Ho Chi Minh City University of Technology, HCMUT) là trường đại học đầu ngành về lĩnh vực kỹ thuật ở miền Nam Việt Nam, thành viên của Đại học Quốc gia Thành phố Hồ Chí Minh và có trụ sở tại Quận 10, Thành phố Hồ Chí Minh\"}, {\"collection_name\": \"thong_tin_truong_dai_hoc\", \"document_name\": \"Tutorial_EDIT.pdf\", \"metadata\": {\"name\": \"Tutorial_EDIT.pdf\", \"description\": \"description123\", \"url\": \"http://192.168.80.166:9001/Tutorial_EDIT.pdf\", \"category\": \"thong_tin_truong_dai_hoc\"}, \"chunk\": \"Năm 2000, trường trở lại mang tên Trường Đại học Bách khoa. Khoa Kỹ thuật Giao thông được thành lập. Năm 2001, Khoa Công nghệ Vật liệu được thành lập. Năm 2003, Khoa Khoa học Ứng dụng được thành lập.\"}, {\"collection_name\": \"thong_tin_truong_dai_hoc\", \"document_name\": \"Tutorial_EDIT.pdf\", \"metadata\": {\"name\": \"Tutorial_EDIT.pdf\", \"description\": \"description123\", \"url\": \"http://192.168.80.166:9001/Tutorial_EDIT.pdf\", \"category\": \"thong_tin_truong_dai_hoc\"}, \"chunk\": \"Tiền thân của Trường Đại học Bách khoa là Trung tâm Quốc gia Kỹ thuật được thành lập từ năm 1957 dưới chính thể Việt Nam Cộng hòa\"}]",
+        "additional_kwargs": {},
+        "response_metadata": {},
+        "type": "tool",
+        "name": "search_at_thong_tin_truong_dai_hoc",
+        "id": "c3b0465c-3c6e-4d08-8438-749dbf35ca0c",
+        "tool_call_id": "be750235-5b36-44e7-85b3-3ed1cb2a5cb5",
+        "artifact": null,
+        "status": "success"
+      },
+      {
+        "content": "Trường Đại học Bách khoa Thành phố Hồ Chí Minh nằm ở Quận 10, Thành phố Hồ Chí Minh.",
+        "additional_kwargs": {},
+        "response_metadata": {
+          "prompt_feedback": {
+            "block_reason": 0,
+            "safety_ratings": []
+          },
+          "finish_reason": "STOP",
+          "safety_ratings": []
+        },
+        "type": "ai",
+        "name": null,
+        "id": "run-90ac0087-9837-4878-b128-e07a4d7f04f3-0",
+        "example": false,
+        "tool_calls": [],
+        "invalid_tool_calls": [],
+        "usage_metadata": {
+          "input_tokens": 1559,
+          "output_tokens": 26,
+          "total_tokens": 1585,
+          "input_token_details": {
+            "cache_read": 0
+          }
+        }
+      }
+    ],
+    "conversation": [
+      {
+        "role": "user",
+        "content": "dia chi cua truong"
+      },
+      {
+        "role": "assistant",
+        "content": "Trường Đại học Bách khoa Thành phố Hồ Chí Minh nằm ở Quận 10, Thành phố Hồ Chí Minh."
+      }
+    ],
+    "summary": {
+      "content": "The user asked for the address of a school (dia chi cua truong). The assistant replied with the address of Ho Chi Minh City University of Technology, locating it in District 10, Ho Chi Minh City.",
+      "additional_kwargs": {},
+      "response_metadata": {
+        "prompt_feedback": {
+          "block_reason": 0,
+          "safety_ratings": []
+        },
+        "finish_reason": "STOP",
+        "safety_ratings": []
+      },
+      "id": "run-8cab4655-6abb-4b5a-b0b5-5c6bbb0eb69b-0",
+      "usage_metadata": {
+        "input_tokens": 65,
+        "output_tokens": 45,
+        "total_tokens": 110,
+        "input_token_details": {
+          "cache_read": 0
+        }
+      }
+    }
+  }
+  

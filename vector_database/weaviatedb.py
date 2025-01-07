@@ -80,8 +80,7 @@ class WeaviateDB:
             limit=limit,
             return_metadata=wvc.query.MetadataQuery(certainty=True)
         )
-        print(response.objects)
-        return response.objects
+        return [ojb.properties for ojb in response.objects]
     
     
     async def close_connection(self) -> None:

@@ -8,6 +8,7 @@ from langchain_core.language_models import BaseChatModel
 
 class State(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
+    old_conversation: list
     summary: str
     user: str
     
@@ -27,6 +28,7 @@ class HistoryAdapter:
 
         return {
             "summary": response.json().get("summary"),
+            "old_conversation": response.json().get("conversation")[-6:],
         }
 
 
@@ -36,7 +38,7 @@ class HistoryAdapter:
             summary = await self.llm.ainvoke(
                     f"Using the previous summary: '{state['summary']}' and the conversation between the user and the assistant, "
                     f"which includes: \nUser: {state['messages'][0].content}\nAssistant: {state['messages'][-1].content}\n"
-                    "provide a concise summary of the interaction."
+                    "provide a concise summary of the old summary and interaction."
                 )
             if not summary.tool_calls and (
                 not summary.content
@@ -46,29 +48,29 @@ class HistoryAdapter:
             else:
                 break
         
-        return state
+        url = f"http://{knowledge_management_api_host}:{knowledge_management_api_port}/knowledge/history"
         
-        # url = f"http://{knowledge_management_api_host}:{knowledge_management_api_port}/knowledge/history"
+        payload = {
+            "user": state["user"],
+            "messages": [m.model_dump_json() for m in state["messages"]],
+            "conversation": [
+                {"role": "user", "content": state["messages"][0].content}, 
+                {"role": "assistant", "content": state["messages"][-1].content}
+            ],
+            "summary": summary.content
+        }
         
-        # payload = {
-        #     "user": state["user"],
-        #     "messages": state["messages"],
-        #     "conversation": [state["messages"][0], state["messages"][-1]],
-        #     "summary": summary
-        # }
+        print(payload)
         
-        # print(payload)
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        async with httpx.AsyncClient() as client:
+            timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
+            response = await client.post(url, headers=headers, json=payload, timeout=timeout)
+            response.raise_for_status()
         
-        # headers = {
-        #     'Content-Type': 'application/json'
-        # }
-        # print('\nAdd chat history\n')
-        # async with httpx.AsyncClient() as client:
-        #     timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
-        #     response = await client.post(url, headers=headers, json=payload, timeout=timeout)
-        #     response.raise_for_status()
-        
-        # return response.json()
+        return response.json()
         
 
 
@@ -103,13 +105,17 @@ class Agent:
         self.primary_assistant_prompt = ChatPromptTemplate.from_messages([
             (
                 "system",
-                "You are a helpful assistant for Bach Khoa University. You speak in Vietnamese. "
-                "Remember all the questions of user is asks about Bach Khoa University. "
-                "If you don't know the answer, dont respond yet, you first priority is to use the provided tools to find information."
-                "Chat history summary: {summary}"
+                "Bạn là một trợ lý cho Đại học Bách Khoa. Bạn nói bằng tiếng Việt. "
+                "Sử dụng các công cụ được cung cấp để tìm kiếm thông tin về trường đại học, học phí và các thông tin khác để hỗ trợ các câu hỏi của người dùng. "
+                "Khi tìm kiếm, hãy kiên trì. Mở rộng phạm vi tìm kiếm của bạn nếu kết quả tìm kiếm đầu tiên không trả về kết quả. "
+                "Nếu một tìm kiếm không có kết quả, hãy mở rộng tìm kiếm trước khi từ bỏ. "
+                "Đây là tóm tắt của lịch sử trò chuyện: {summary}. " 
+                "Lịch sử trò chuyện gần nhất: {old_conversation}. "
             ),
             ("placeholder", "{messages}"),
         ])
+
+
 
         self.chain = self.primary_assistant_prompt | llm.bind_tools(self.query_tools)
 
@@ -128,5 +134,3 @@ class Agent:
         builder.add_edge("summarizer", END)
 
         return builder.compile()
-
-#  If you don't know the answer, use the provided tools to query the vector database for information before responding to the user.
