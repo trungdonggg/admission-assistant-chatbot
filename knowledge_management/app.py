@@ -108,7 +108,10 @@ async def add_document(
         )
         print('Document added to vector database')
 
-        return {"response": "Document added successfully"}
+        return {
+            "response": "Document added successfully",
+            "success": True,
+        }
 
     except Exception as e:
         minioClient.delete(res['object_name'])
@@ -149,20 +152,23 @@ async def delete_document(collection_name: str, document_name: str) -> Dict:
         await remove_document_from_vectordb(collection_name, document_name)
         print('Document deleted from vector database')
         
-        return {"deleted": document_name}
+        return {
+            "deleted": document_name,
+            "success": True,
+        }
     except Exception as e:
         logger.error(f"Error in deleting document: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
     
 
 @app.get("/knowledge/documents/download")
-async def download_document(document_name: str) -> FileResponse:
+async def download_document(document_name: str, content_type: str) -> FileResponse:
     print(f"Downloading document: {document_name}")
     try:
         data_stream = BytesIO(minioClient.download(document_name))
         response = StreamingResponse(
             content=data_stream,
-            media_type="application/octet-stream",
+            media_type=content_type,
             headers={"Content-Disposition": f"attachment; filename={document_name}"}
         )
         return response

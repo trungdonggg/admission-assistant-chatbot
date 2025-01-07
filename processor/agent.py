@@ -99,6 +99,14 @@ class Agent:
         self.query_tools = [
             search_at_thong_tin_truong_dai_hoc,
             search_at_thong_tin_khoa_cong_nghe_thong_tin,
+            search_at_thong_tin_khoa_ngon_ngu,
+            search_at_thong_tin_khoa_kinh_te,
+            search_at_thong_tin_khoa_y,
+            search_at_thong_tin_khoa_cong_nghe_sinh_hoc,
+            search_at_thong_tin_khoa_dieu_duong,
+            search_at_thong_tin_khoa_khai_phong,
+            search_at_thong_tin_giang_vien,
+            search_at_thong_tin_nghien_cuu,
             search_at_thong_tin_chi_phi,
         ]
 

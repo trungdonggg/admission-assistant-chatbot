@@ -73,10 +73,9 @@ def router(
 
 
 
-
 async def search_at_thong_tin_truong_dai_hoc(query: str) -> str:
     """
-    Search for relevant documents in the "thong_tin_truong_dai_hoc" collection using a query string and a vector.
+    Search for relevant documents in the "thong_tin_truong_dai_hoc" collection using a query string.
 
     Args:
         query (str): The textual query to search for within the collection.
@@ -85,36 +84,138 @@ async def search_at_thong_tin_truong_dai_hoc(query: str) -> str:
         str: The search results retrieved from the vector database, containing relevant documents.
     """
     vector = await vectorize(query)
-
     return await query_vectordb(collection_name="thong_tin_truong_dai_hoc", content=query, vector=vector[0], limit=7)
 
-async def search_at_thong_tin_khoa_cong_nghe_thong_tin(query: str, vector: List[float]) -> str:
+async def search_at_thong_tin_khoa_cong_nghe_thong_tin(query: str) -> str:
     """
-    Search for relevant documents in the "thong_tin_khoa_cong_nghe_thong_tin" collection using a query string and a vector.
+    Search for relevant documents in the "thong_tin_khoa_cong_nghe_thong_tin" collection using a query string.
 
     Args:
         query (str): The textual query to search for within the collection.
-        vector (List[float]): The vector representation of the query for vector-based search.
 
     Returns:
         str: The search results retrieved from the vector database, containing relevant documents.
     """
     vector = await vectorize(query)
     return await query_vectordb(collection_name="thong_tin_khoa_cong_nghe_thong_tin", content=query, vector=vector[0], limit=7)
-    
-async def search_at_thong_tin_chi_phi(query: str, vector: List[float]) -> Dict:
+
+async def search_at_thong_tin_khoa_ngon_ngu(query: str) -> str:
     """
-    Search for relevant documents in the "thong_tin_chi_phi" collection using a query string and a vector.
+    Search for relevant documents in the "thong_tin_khoa_ngon_ngu" collection using a query string.
 
     Args:
         query (str): The textual query to search for within the collection.
-        vector (List[float]): The vector representation of the query for vector-based search.
+
+    Returns:
+        str: The search results retrieved from the vector database, containing relevant documents.
+    """
+    vector = await vectorize(query)
+    return await query_vectordb(collection_name="thong_tin_khoa_ngon_ngu", content=query, vector=vector[0], limit=7)
+
+async def search_at_thong_tin_khoa_kinh_te(query: str) -> str:
+    """
+    Search for relevant documents in the "thong_tin_khoa_kinh_te" collection using a query string.
+
+    Args:
+        query (str): The textual query to search for within the collection.
+
+    Returns:
+        str: The search results retrieved from the vector database, containing relevant documents.
+    """
+    vector = await vectorize(query)
+    return await query_vectordb(collection_name="thong_tin_khoa_kinh_te", content=query, vector=vector[0], limit=7)
+
+async def search_at_thong_tin_khoa_y(query: str) -> str:
+    """
+    Search for relevant documents in the "thong_tin_khoa_y" collection using a query string.
+
+    Args:
+        query (str): The textual query to search for within the collection.
+
+    Returns:
+        str: The search results retrieved from the vector database, containing relevant documents.
+    """
+    vector = await vectorize(query)
+    return await query_vectordb(collection_name="thong_tin_khoa_y", content=query, vector=vector[0], limit=7)
+
+async def search_at_thong_tin_khoa_cong_nghe_sinh_hoc(query: str) -> str:
+    """
+    Search for relevant documents in the "thong_tin_khoa_cong_nghe_sinh_hoc" collection using a query string.
+
+    Args:
+        query (str): The textual query to search for within the collection.
+
+    Returns:
+        str: The search results retrieved from the vector database, containing relevant documents.
+    """
+    vector = await vectorize(query)
+    return await query_vectordb(collection_name="thong_tin_khoa_cong_nghe_sinh_hoc", content=query, vector=vector[0], limit=7)
+
+async def search_at_thong_tin_khoa_dieu_duong(query: str) -> str:
+    """
+    Search for relevant documents in the "thong_tin_khoa_dieu_duong" collection using a query string.
+
+    Args:
+        query (str): The textual query to search for within the collection.
+
+    Returns:
+        str: The search results retrieved from the vector database, containing relevant documents.
+    """
+    vector = await vectorize(query)
+    return await query_vectordb(collection_name="thong_tin_khoa_dieu_duong", content=query, vector=vector[0], limit=7)
+
+async def search_at_thong_tin_khoa_khai_phong(query: str) -> str:
+    """
+    Search for relevant documents in the "thong_tin_khoa_khai_phong" collection using a query string.
+
+    Args:
+        query (str): The textual query to search for within the collection.
+
+    Returns:
+        str: The search results retrieved from the vector database, containing relevant documents.
+    """
+    vector = await vectorize(query)
+    return await query_vectordb(collection_name="thong_tin_khoa_khai_phong", content=query, vector=vector[0], limit=7)
+
+async def search_at_thong_tin_giang_vien(query: str) -> str:
+    """
+    Search for relevant documents in the "thong_tin_giang_vien" collection using a query string.
+
+    Args:
+        query (str): The textual query to search for within the collection.
+
+    Returns:
+        str: The search results retrieved from the vector database, containing relevant documents.
+    """
+    vector = await vectorize(query)
+    return await query_vectordb(collection_name="thong_tin_giang_vien", content=query, vector=vector[0], limit=7)
+
+async def search_at_thong_tin_nghien_cuu(query: str) -> str:
+    """
+    Search for relevant documents in the "thong_tin_nghien_cuu" collection using a query string.
+
+    Args:
+        query (str): The textual query to search for within the collection.
+
+    Returns:
+        str: The search results retrieved from the vector database, containing relevant documents.
+    """
+    vector = await vectorize(query)
+    return await query_vectordb(collection_name="thong_tin_nghien_cuu", content=query, vector=vector[0], limit=7)
+
+async def search_at_thong_tin_chi_phi(query: str) -> str:
+    """
+    Search for relevant documents in the "thong_tin_chi_phi" collection using a query string.
+
+    Args:
+        query (str): The textual query to search for within the collection.
 
     Returns:
         str: The search results retrieved from the vector database, containing relevant documents.
     """
     vector = await vectorize(query)
     return await query_vectordb(collection_name="thong_tin_chi_phi", content=query, vector=vector[0], limit=7)
+
 
 
 
