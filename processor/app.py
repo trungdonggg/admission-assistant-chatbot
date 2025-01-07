@@ -1,40 +1,53 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
-from processor.models import AddDocument, SearchRequest
-from processor.process import Processor
+from pydantic import BaseModel
+from processor.agent import *
 import logging
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import HumanMessage
+import os
+import dotenv
+dotenv.load_dotenv()
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-app = FastAPI()
-processor = Processor()
+llm = ChatGoogleGenerativeAI(
+        model="gemini-1.5-pro",
+        google_api_key=os.getenv("GOOGLE_AI_API_KEY"),
+    )
+
+history_adapter = HistoryAdapter(llm=llm)
+
+class SearchRequest(BaseModel):
+    query: str 
+    user: str
 
 
-@app.post("/add-document")
-async def add_document(request: AddDocument):
-    try:
-        await processor.add_document(request)
-        return {"status": "Document added successfully"}
-    except Exception as e:
-        logger.error(f"Error in adding document: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global agent
+    agent = Agent(history_adapter=history_adapter, llm=llm).build_graph()
+    yield
 
+app = FastAPI(lifespan=lifespan)
 
-@app.delete("/delete-document")
-async def delete_document(document_name: str):
-    try:
-        await processor.delete_document(document_name)
-        return {"status": f"Document '{document_name}' deleted successfully"}
-    except Exception as e:
-        logger.error(f"Error in deleting document: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/search")
 async def search(request: SearchRequest):
     try:
-        response = await processor.search(request)
-        return {"response": response}
+        res = await agent.ainvoke({
+            "messages": [HumanMessage(content=request.query)], 
+            "user": request.user
+            })
+        
+        return {
+            "user": request.user,
+            "response": res["messages"][-1].content
+        }
+
     except Exception as e:
         logger.error(f"Error in searching: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

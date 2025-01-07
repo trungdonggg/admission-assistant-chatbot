@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from embed import Embedding
+from embedding.embed import Embedding
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 
@@ -9,7 +9,6 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-embedder: Embedding = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -1,6 +1,6 @@
 from pymongo import AsyncMongoClient
 import config
-from typing import List, Union, Dict
+from typing import List, Dict
 
 
 client = AsyncMongoClient(host="localhost", port=config.mongo_service)
@@ -79,32 +79,36 @@ class History:
     def __init__(self) -> None:
         pass
     
-    async def get(self, user: str) -> List:
+    async def get(self, user: str) -> Dict:
         if not user:
             raise ValueError
         
-        history = await history.find_one({"user": user})
+        his = await history.find_one({"user": user})
         
-        if not history:
-            return []
+        if not his:
+            return {"user": user, "messages": [], "conversation": [], "summary": ""}
         
-        history["_id"] = str(history["_id"])
+        his.pop("_id")
         
-        return history["history"]
+        return his
 
 
-    async def post(self, user: str, messages: List) -> str:
-
-        if not user or not messages:
-            raise NameError
+    async def post(self, user: str, messages: List, conversation: List, summary: str) -> str:
 
         await history.update_one(
             {"user": user},
-            {"$push": {"history": {"$each": messages}}},
+            {
+                "$push": {
+                    "messages": {"$each": messages},
+                    "conversation": {"$each": conversation}
+                },
+                "$set": {"summary": summary}
+            },
             upsert=True
         )
 
         return user
+    
     
     async def delete(self, user: str) -> str:
         

@@ -1,18 +1,18 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
-from database import History, Document
-from storage import MinioHandler
+from knowledge_management.database import History, Document
+from knowledge_management.storage import MinioHandler
 from fastapi import FastAPI, HTTPException, UploadFile, Form, File
 from fastapi.responses import FileResponse, StreamingResponse
 from contextlib import asynccontextmanager
 import logging
-from utils import *
+from knowledge_management.utils import *
+import categry
 from io import BytesIO
 
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 
 class DocumentMetadata(BaseModel):
@@ -21,24 +21,22 @@ class DocumentMetadata(BaseModel):
     type: str = Field(..., description="Type of the file")
     content: str = Field(..., description="Content of the file in text format")
     owner: str = Field(..., description="Owner of the file")
+    category: categry.categories = Field(..., description="Category of the file")
     department: str = Field(..., description="Department associated with the file")
     description: str = Field(..., description="Description of the file")
     university: str = Field(..., description="University associated with the file")
     addition: Optional[dict] = Field(None, description="Additional information about the file (if any)")
     minio: Dict = Field(..., description="Minio return data")
+    url: str = Field(..., description="url to download the file")
 
     
 
 class AddChatHistoryRequest(BaseModel):
     user: str = Field(..., description="User name")
-    messages: List = Field(..., description="List of messages to add to history")
+    messages: List = Field(..., description="List of all kind of messages to add to messages")
+    conversation: List = Field(..., description="List of messages of human and assistant")
+    summary: str = Field(..., description="Summary of conversation")
     
-    
-
-
-doc: Document = None
-history: History = None
-minioClient: MinioHandler = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -56,9 +54,10 @@ async def add_document(
     file: UploadFile = File(...), 
     content: str = Form(...),
     owner: str = Form(...),
+    category: categry.categories = Form(...),
     department: str = Form(...),
     description: str = Form(...),
-    university: str = Form(...),
+    university: str = Form(...),    
     addition: Optional[Dict] = Form(None),
 ) -> Dict:
     try:
@@ -74,11 +73,13 @@ async def add_document(
                 type=file.content_type,
                 content=content,
                 owner=owner,
+                category=category,
                 department=department,
                 description=description,
                 university=university,
                 addition=addition,
                 minio=res,
+                url=f'The address of frontend section to preview the file.'
             ).model_dump()
         
         await doc.post(data)
@@ -91,24 +92,31 @@ async def add_document(
         vectors = await vectorize(chunks)
         print('Vectors generated')
         
+        keys_to_remove = ["content", "size", "type", "owner", "minio", "department", "university"]
+        for key in keys_to_remove:
+            data.pop(key, None)
         if not addition:
             data.pop("addition", None)
         await add_document_to_vectordb(
-            AddDocumentRequestVectorDatabase(
+            AddDocumentToVectorDatabaseRequest(
+                collection_name=category,
                 document_name=file.filename,
                 chunks=chunks,
                 vectors=vectors,
-                metadata=data
+                metadata=data 
             )
         )
         print('Document added to vector database')
 
-        return data
+        return {
+            "response": "Document added successfully",
+            "success": True,
+        }
 
     except Exception as e:
         minioClient.delete(res['object_name'])
         await doc.delete(file.filename)
-        await remove_document_from_vectordb(file.filename)
+        await remove_document_from_vectordb(category, file.filename)
         
         logger.error(f"Error in adding document: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -118,9 +126,7 @@ async def add_document(
 async def get_documents(document_name: str = None) -> Dict:
     try:
         res = await doc.get_document(document_name)
-        return {
-            "documents": res
-        }
+        return {"documents": res}
     except Exception as e:
         logger.error(f"Error in getting documents: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -130,44 +136,41 @@ async def get_documents(document_name: str = None) -> Dict:
 async def get_user_documents(user: str) -> Dict:
     try:
         res = await doc.get_user_documents(user)
-        return {
-            "user": res
-        }
+        return {"user": res}
     except Exception as e:
         logger.error(f"Error in getting documents: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.delete("/knowledge/documents")
-async def delete_document(document_name: str) -> Dict:
+async def delete_document(collection_name: str, document_name: str) -> Dict:
     try:
         minioClient.delete(document_name)
         print('Document deleted from Minio')
         await doc.delete(document_name)
         print('Document deleted from database')
-        await remove_document_from_vectordb(document_name)
+        await remove_document_from_vectordb(collection_name, document_name)
         print('Document deleted from vector database')
         
-        return {"deleted": document_name}
+        return {
+            "deleted": document_name,
+            "success": True,
+        }
     except Exception as e:
         logger.error(f"Error in deleting document: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
     
 
 @app.get("/knowledge/documents/download")
-async def download_document(document_name: str) -> FileResponse:
+async def download_document(document_name: str, content_type: str) -> FileResponse:
     print(f"Downloading document: {document_name}")
     try:
-        pdf_stream = BytesIO(minioClient.download(document_name))
-        #print(f'Document downloaded from Minio: {pdf_stream}')
-        # Create a StreamingResponse to send the PDF as a downloadable file
+        data_stream = BytesIO(minioClient.download(document_name))
         response = StreamingResponse(
-            pdf_stream,
-            media_type="application/pdf",
+            content=data_stream,
+            media_type=content_type,
+            headers={"Content-Disposition": f"attachment; filename={document_name}"}
         )
-        #print(f'Response created: {response}')
-        response.headers["Content-Disposition"] = "attachment; filename=downloaded_file.pdf"
-
         return response
 
     except Exception as e:
@@ -178,22 +181,26 @@ async def download_document(document_name: str) -> FileResponse:
 
 
 
-    
+
+
+
+
+
+
 @app.post("/knowledge/history")
 async def add_history(request: AddChatHistoryRequest) -> Dict:
     try:
         await history.post(**request.model_dump()) 
-        return {"added": request.user}
+        return {"history_added": request.user}
     except Exception as e:
         logger.error(f"Error in adding history: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
-
 
 @app.get("/knowledge/history")
 async def get_history(user: str) -> Dict:
     try:
         his = await history.get(user)
-        return {"history": his}
+        return his
     except Exception as e:
         logger.error(f"Error in getting history: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))

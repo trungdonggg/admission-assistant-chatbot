@@ -2,14 +2,19 @@ from config import *
 import httpx
 from typing import List, Dict
 from pydantic import BaseModel
+from categry import *
     
     
-class AddDocumentRequestVectorDatabase(BaseModel):
+class AddDocumentToVectorDatabaseRequest(BaseModel):
+    collection_name: categories 
     document_name: str
     chunks: List[str]
     vectors: List[List[float]]
     metadata: Dict
 
+class RemoveDocumentFromVectorDatabaseRequest(BaseModel):
+    collection_name: categories 
+    document_name: str
 
 
 
@@ -53,7 +58,7 @@ async def vectorize(request: List[str]) -> List[List[float]]:
 
 
 
-async def add_document_to_vectordb(request: AddDocumentRequestVectorDatabase):
+async def add_document_to_vectordb(request: AddDocumentToVectorDatabaseRequest):
     url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever"
     
     payload = request.model_dump()
@@ -72,8 +77,8 @@ async def add_document_to_vectordb(request: AddDocumentRequestVectorDatabase):
 
 
 
-async def remove_document_from_vectordb(document_name: str):
-    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever?document_name={document_name}"
+async def remove_document_from_vectordb(collection_name: str, document_name: str):
+    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever?collection_name={collection_name}&document_name={document_name}"
     
     async with httpx.AsyncClient() as client:
         timeout = httpx.Timeout(connect=5.0, read=60.0, write=60.0, pool=10.0)
