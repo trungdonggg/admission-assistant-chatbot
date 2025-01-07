@@ -57,7 +57,7 @@ async def add_document(
     category: categry.categories = Form(...),
     department: str = Form(...),
     description: str = Form(...),
-    university: str = Form(...),
+    university: str = Form(...),    
     addition: Optional[Dict] = Form(None),
 ) -> Dict:
     try:
