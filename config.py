@@ -23,10 +23,11 @@ processor_api_port=7000
 
 server_235 = "192.168.10.235"
 server_226 = "128.214.255.226"
+may_12_labsoe = "192.168.80.166"
 local = "0.0.0.0"
 
 
-database_api_host = local
+knowledge_management_api_host = may_12_labsoe
 vectordb_api_host = local
 embedding_api_host = server_226
 llm_api_host = local

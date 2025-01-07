@@ -27,13 +27,15 @@ class DocumentMetadata(BaseModel):
     university: str = Field(..., description="University associated with the file")
     addition: Optional[dict] = Field(None, description="Additional information about the file (if any)")
     minio: Dict = Field(..., description="Minio return data")
+    url: str = Field(..., description="url to download the file")
 
     
 
 class AddChatHistoryRequest(BaseModel):
     user: str = Field(..., description="User name")
-    messages: List = Field(..., description="List of messages to add to history")
-    summary: str = Field(..., description="Summary of history")
+    messages: List = Field(..., description="List of all kind of messages to add to messages")
+    conversation: List = Field(..., description="List of messages of human and assistant")
+    summary: str = Field(..., description="Summary of conversation")
     
 
 @asynccontextmanager
@@ -77,6 +79,7 @@ async def add_document(
                 university=university,
                 addition=addition,
                 minio=res,
+                url=f'http://{knowledge_management_api_host}:9001/' + res['object_name']
             ).model_dump()
         
         await doc.post(data)

@@ -86,23 +86,24 @@ class History:
         his = await history.find_one({"user": user})
         
         if not his:
-            return {"user": user, "history": [], "summary": ""}
+            return {"user": user, "messages": [], "conversation": [], "summary": ""}
         
         his.pop("_id")
         
         return his
 
 
-    async def post(self, user: str, messages: List, summary: str) -> str:
-
-        if not user or not messages:
-            raise NameError
+    async def post(self, user: str, messages: List, conversation: List, summary: str) -> str:
 
         await history.update_one(
             {"user": user},
-            {"$push": {"history": {"$each": messages}}},
-            {"$set": {"summary": summary}},
-
+            {
+                "$push": {
+                    "messages": {"$each": messages},
+                    "conversation": {"$each": conversation}
+                },
+                "$set": {"summary": summary}
+            },
             upsert=True
         )
 

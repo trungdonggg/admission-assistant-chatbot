@@ -1,7 +1,6 @@
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode, tools_condition
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.language_models.chat_models import BaseChatModel
 from processor.defined_tools import *
 
 
@@ -23,7 +22,7 @@ class Assistant:
 
 
 class Agent:
-    def __init__(self, llm: BaseChatModel):
+    def __init__(self, llm):
         self.llm = llm
         self.query_tools = [
             search_at_thong_tin_truong_dai_hoc,

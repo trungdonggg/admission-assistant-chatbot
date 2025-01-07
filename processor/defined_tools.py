@@ -5,8 +5,7 @@ from typing import Literal
 from categry import *
 from pydantic import BaseModel
 from langgraph.graph.message import add_messages, AnyMessage
-from langchain_core.language_models.chat_models import BaseChatModel
-
+from config import *
 
 async def query_vectordb(
         collection_name: categories,
@@ -15,7 +14,7 @@ async def query_vectordb(
         limit: int,
     ) -> List:
  
-    url = "http://0.0.0.0:8081/retriever/query"
+    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever/query"
     
     payload = {
         "collection_name": collection_name,
@@ -37,7 +36,7 @@ async def query_vectordb(
 
 
 async def vectorize(content: str) -> List[List[float]]:
-    url = "http://128.214.255.226:5000/vectorize"
+    url = f"http://{embedding_api_host}:{embedding_api_port}/vectorize"
     
     payload = {"content": [content]}
 
@@ -141,9 +140,9 @@ class State(TypedDict):
     summary: str
     user: str
 
-async def get_chat_history(state: State) -> List[str]:
+async def get_chat_history(state: State):
     user = state["user"]
-    url = f"http://0.0.0.0:8000/knowledge/history?user={user}"
+    url = f"http://{knowledge_management_api_host}:{knowledge_management_api_port}/knowledge/history?user={user}"
     
     async with httpx.AsyncClient() as client:
         timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
@@ -155,8 +154,8 @@ async def get_chat_history(state: State) -> List[str]:
     }
 
 
-async def add_chat_history(state: State, llm: BaseChatModel) -> None:
-    url = "http://0.0.0.0:8000/knowledge/history"
+async def add_chat_history(state: State, llm) -> None:
+    url = f"http://{knowledge_management_api_host}:{knowledge_management_api_port}/knowledge/history"
 
     while True:
         summary = await llm.ainvoke(
@@ -174,7 +173,8 @@ async def add_chat_history(state: State, llm: BaseChatModel) -> None:
     
     payload = {
         "user": state["user"],
-        "messages": [state["messages"][0], state["messages"][-1]],
+        "messages": state["messages"],
+        "conversation": [state["messages"][0], state["messages"][-1]],
         "summary": summary
     }
     
@@ -186,6 +186,8 @@ async def add_chat_history(state: State, llm: BaseChatModel) -> None:
         timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
         response = await client.post(url, headers=headers, json=payload, timeout=timeout)
         response.raise_for_status()
+    
+    return response.json()
     
 
 
