@@ -1,4 +1,4 @@
-# constants, should not be change. if you want to change these value, you should modify run.sh files and config starting docker process also. 
+# constants, should not be change. if you want to change these value, you should modify startdocker.sh files and config starting docker process also. 
 mongo_service=27017
 knowledge_management_api_port=8000
 
@@ -32,7 +32,7 @@ may_12_labsoe = "192.168.80.166"
 local = "0.0.0.0"
 
 
-knowledge_management_api_host = may_12_labsoe
+knowledge_management_api_host = local
 vectordb_api_host = local
 embedding_api_host = server_226
 llm_api_host = local
