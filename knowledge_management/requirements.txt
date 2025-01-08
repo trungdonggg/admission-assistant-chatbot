@@ -1,6 +1,6 @@
-pymongo
-pydantic
-fastapi
-uvicorn
+pymongo==4.10.1
+pydantic==2.10.4
+fastapi==0.110.0
+uvicorn==0.27.1
 typing
-minio
+minio==7.2.9
