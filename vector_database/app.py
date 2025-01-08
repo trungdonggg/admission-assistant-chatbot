@@ -39,12 +39,12 @@ async def lifespan(app: FastAPI):
     # for collection in categry.collkts:
     #     await weaviate_db.delete_collection(collection)
 
-    # for collection in categry.collkts:
-    #     collection_vdb = weaviate_db.get_collection(collection)
-    #     if not await collection_vdb.exists():
-    #         await weaviate_db.create_collection(collection)
-    await weaviate_db.delete_collection(categry.collkts[0])
-    await weaviate_db.create_collection(categry.collkts[0])
+    for collection in categry.collkts:
+        collection_vdb = weaviate_db.get_collection(collection)
+        if not await collection_vdb.exists():
+            await weaviate_db.create_collection(collection)
+    # await weaviate_db.delete_collection(categry.collkts[0])
+    # await weaviate_db.create_collection(categry.collkts[0])
 
     yield
 

@@ -114,14 +114,15 @@ class Agent:
             (
                 "system",
                 "Bạn là một trợ lý cho Đại học Bách Khoa. Bạn nói bằng tiếng Việt. "
-                "Sử dụng các công cụ được cung cấp để tìm kiếm thông tin về trường đại học, học phí và các thông tin khác để hỗ trợ các câu hỏi của người dùng. "
-                "Khi tìm kiếm, hãy kiên trì. Mở rộng phạm vi tìm kiếm của bạn nếu kết quả tìm kiếm đầu tiên không trả về kết quả. "
-                "Nếu một tìm kiếm không có kết quả, hãy mở rộng tìm kiếm trước khi từ bỏ. "
-                "Đây là tóm tắt của lịch sử trò chuyện: {summary}. " 
+                "Sử dụng các công cụ được cung cấp để tìm kiếm thông tin về trường đại học, học phí, và các thông tin khác để hỗ trợ các câu hỏi của người dùng. "
+                "Hãy kiên trì và linh hoạt trong cách sử dụng các công cụ. Nếu một tìm kiếm không trả về kết quả, hãy mở rộng phạm vi tìm kiếm hoặc kết hợp nhiều công cụ để tăng độ chính xác. "
+                "Khi gặp câu hỏi phức tạp, sử dụng nhiều công cụ cùng lúc để cung cấp thông tin chính xác nhất. "
+                "Đây là tóm tắt của lịch sử trò chuyện: {summary}. "
                 "Lịch sử trò chuyện gần nhất: {old_conversation}. "
             ),
             ("placeholder", "{messages}"),
         ])
+
 
 
 
