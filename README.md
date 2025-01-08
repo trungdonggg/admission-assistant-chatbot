@@ -2,6 +2,13 @@
 
 This is a distributed system designed so you can have them working on different server.
 
+### Requirements:
+```
+python 3.11
+docker installed
+```
+
+
 ## These are the steps to start this system:
 
 ### 1. Clone the project: 
