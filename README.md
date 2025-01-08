@@ -33,20 +33,30 @@ Get a [Google AI Studio API key](https://aistudio.google.com/apikey) and add to 
 #### 3.3 Start vector database (weaviate) service:
 
     cd vector_database
-    sh run.sh
 
-- If docker for vector database service is already running:
+- If you haven't started vector database (weaviate) docker:
 
-      sh run.sh docker=false
+        sh startdocker.sh
+        sh run.sh
+
+- If you already started vector database (weaviate) docker:
+
+        sh run.sh
+
 
 #### 3.4 Start knowledge management service:
 
     cd knowledge_management
-    sh run.sh
-    
-- If docker for knowledge management service is already running:
 
-      sh run.sh docker=false
+- If you haven't started knowledge management's docker:
+
+        sh startdocker.sh
+        sh run.sh
+
+- If you already started knowledge management's docker:
+
+        sh run.sh
+    
 
 #### 3.5 Start the processor service:
 
