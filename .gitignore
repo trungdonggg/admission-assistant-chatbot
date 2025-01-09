@@ -122,3 +122,7 @@ cython_debug/
 .ipynb_checkpoints
 .ipynb
 test.py
+
+node_modules
+package.json
+package-lock.json
