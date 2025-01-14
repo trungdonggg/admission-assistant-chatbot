@@ -1,12 +1,12 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
-from knowledge_management.database import History, Document
-from knowledge_management.storage import MinioHandler
+from knowledge_manager.database import History, Document
+from knowledge_manager.storage import MinioHandler
 from fastapi import FastAPI, HTTPException, UploadFile, Form, File
 from fastapi.responses import FileResponse, StreamingResponse
 from contextlib import asynccontextmanager
 import logging
-from knowledge_management.utils import *
+from knowledge_manager.utils import *
 import categry
 from io import BytesIO
 
