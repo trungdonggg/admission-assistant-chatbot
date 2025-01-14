@@ -3,6 +3,7 @@ from typing import List, Optional, Dict
 from knowledge_manager.database import History, Document
 from knowledge_manager.storage import MinioHandler
 from fastapi import FastAPI, HTTPException, UploadFile, Form, File
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
 from contextlib import asynccontextmanager
 import logging
@@ -47,7 +48,20 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+# Define the list of allowed origins
+origins = [
+    "http://localhost:3000",
+    "*"  # Allow all origins (use with caution)
+]
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # List of allowed origins
+    allow_credentials=True,  # Allow credentials (e.g., cookies, authorization headers)
+    allow_methods=["*"],  # Allow all HTTP methods (e.g., GET, POST)
+    allow_headers=["*"],  # Allow all headers
+)
 
 @app.post("/knowledge/documents")
 async def add_document(
