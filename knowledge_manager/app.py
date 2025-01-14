@@ -145,7 +145,7 @@ async def get_user_documents(user: str) -> Dict:
 @app.delete("/knowledge/documents")
 async def delete_document(document_name: str) -> Dict:
     try:
-        collection_name = (await doc.get_collection(document_name))[0].collection_name
+        collection_name = (await doc.get_document(document_name))[0]['category']
         minioClient.delete(document_name)
         print('Document deleted from Minio')
         await doc.delete(document_name)
@@ -166,7 +166,7 @@ async def delete_document(document_name: str) -> Dict:
 async def download_document(document_name: str) -> FileResponse:
     print(f"Downloading document: {document_name}")
     try:
-        mtype = (await doc.get_document(document_name))[0].content_type
+        mtype = (await doc.get_document(document_name))[0]['type']
         data_stream = BytesIO(minioClient.download(document_name))
         response = StreamingResponse(
             content=data_stream,
