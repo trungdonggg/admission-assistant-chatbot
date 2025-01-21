@@ -6,14 +6,14 @@ from categry import *
     
     
 class AddDocumentToVectorDatabaseRequest(BaseModel):
-    collection_name: categories 
+    collection_name: List[categories] 
     document_name: str
     chunks: List[str]
     vectors: List[List[float]]
     metadata: Dict
 
 class RemoveDocumentFromVectorDatabaseRequest(BaseModel):
-    collection_name: categories 
+    collection_name: List[categories] 
     document_name: str
 
 

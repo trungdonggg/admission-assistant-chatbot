@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class AddDocumentRequest(BaseModel):
-    collection_name: categry.categories
+    collection_name: List[categry.categories]
     document_name: str
     chunks: List[str]
     vectors: List[List[float]]
@@ -20,7 +20,7 @@ class AddDocumentRequest(BaseModel):
 
 
 class QueryRequest(BaseModel):
-    collection_name: categry.categories
+    collection_name: List[categry.categories]
     content: Optional[str]
     vector: List[float]
     limit: int 
@@ -58,10 +58,13 @@ app = FastAPI(lifespan=lifespan)
 @app.post("/retriever")
 async def add_document(doc: AddDocumentRequest) -> Dict:
     try:
-        response = await weaviate_db.add_document(**doc.model_dump())
-        return {"message": "Document added successfully", "response": response}
+        for c in doc.collection_name:
+            await weaviate_db.add_document(**doc.model_dump(), collection_name=c)
+        return {"message": "Document added successfully"}
     except Exception as e:
         logger.error(f"Error in adding document to weaviate: {str(e)}", exc_info=True)
+        for c in doc.collection_name:
+            await weaviate_db.remove_document(c, doc.document_name)
         raise HTTPException(status_code=500, detail=str(e))
 
 

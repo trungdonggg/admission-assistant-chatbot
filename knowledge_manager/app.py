@@ -22,7 +22,7 @@ class DocumentMetadata(BaseModel):
     type: str = Field(..., description="Type of the file")
     content: str = Field(..., description="Content of the file in text format")
     owner: str = Field(..., description="Owner of the file")
-    category: categry.categories = Field(..., description="Category of the file")
+    category: List[categry.categories] = Field(..., description="Category of the file")
     department: str = Field(..., description="Department associated with the file")
     description: str = Field(..., description="Description of the file")
     university: str = Field(..., description="University associated with the file")
@@ -68,7 +68,7 @@ async def add_document(
     file: UploadFile = File(...), 
     content: str = Form(...),
     owner: str = Form(...),
-    category: categry.categories = Form(...),
+    category: List[categry.categories] = Form(...),
     department: str = Form(...),
     description: str = Form(...),
     university: str = Form(...),    
