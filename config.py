@@ -35,6 +35,5 @@ rabbitmq_url = "amqp://guest:guest@0.0.0.0/"
 all_queues = {
     "vectordb": "vectordb",
     "embedding": "embedding",
-    "llm": "llm",
     "processor": "processor",
 }

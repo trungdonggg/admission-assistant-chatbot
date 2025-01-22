@@ -35,20 +35,30 @@ async def search(request: SearchRequest):
         raise Exception("Error in searching")
     
 
+
 async def main():
     global agent
 
     connection = await connect_robust(RABBITMQ_URL)
-    channel = await connection.channel()
-    rpc = await RPC.create(channel)
-    await rpc.register(all_queues["search"], search, auto_delete=True)
+    
+    channel_processor = await connection.channel()
+    processor_rpc = await RPC.create(channel_processor)
+    
+    channel_embedder = await connection.channel()
+    embedder_rpc = await RPC.create(channel_embedder)
+    
+    channel_vectordb = await connection.channel()
+    vectordb_rpc = await RPC.create(channel_vectordb)
 
     llm = ChatGoogleGenerativeAI(
         model="gemini-1.5-pro",
         google_api_key=os.getenv("GOOGLE_AI_API_KEY"),
     )
     history_adapter = HistoryAdapter(llm=llm)
-    agent = Agent(history_adapter=history_adapter, llm=llm).build_graph()
+    
+    agent = Agent(history_adapter=history_adapter, llm=llm, vdb_rpc=vectordb_rpc, emb_rpc=embedder_rpc).build_graph()
+    
+    await processor_rpc.register(all_queues["processor"], search, auto_delete=True)
 
     logger.info("Processor is running and waiting for requests...")
 
