@@ -12,7 +12,7 @@ from io import BytesIO
 from knowledge_manager.models import *
 from aio_pika import connect_robust
 from aio_pika.patterns import RPC
-from config import RABBITMQ_URL, knowledge_management_api_port
+from config import RABBITMQ_URL, knowledge_manager_api_port
 import uvicorn
 import asyncio
 
@@ -249,7 +249,7 @@ async def initialize_resources():
         logger.info("Resources initialized successfully.")
     except Exception as e:
         logger.error(f"Error initializing resources: {str(e)}", exc_info=True)
-        raise RuntimeError("Failed to initialize resources")
+        raise Exception("Failed to initialize resources")
 
 async def cleanup_resources():
     """Clean up global resources."""
@@ -259,12 +259,13 @@ async def cleanup_resources():
             logger.info("RPC connection closed.")
     except Exception as e:
         logger.error(f"Error cleaning up resources: {str(e)}", exc_info=True)
+        raise Exception("Failed to clean up resources")
 
 def main():
     """Runs the FastAPI app with Uvicorn."""
     try:
         asyncio.run(initialize_resources())
-        uvicorn.run("app:app", host="0.0.0.0", port=knowledge_management_api_port, reload=True)
+        uvicorn.run("app:app", host="0.0.0.0", port=knowledge_manager_api_port, reload=True)
     finally:
         asyncio.run(cleanup_resources())
 
