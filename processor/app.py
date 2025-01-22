@@ -1,11 +1,14 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from processor.agent import *
+from processor.agent import Agent
+from processor.history_adapter import HistoryAdapter
 import logging
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
+from processor.models import SearchRequest
 import os
+from aio_pika import connect_robust
+from aio_pika.patterns import RPC
+import asyncio
+from config import RABBITMQ_URL, all_queues
 import dotenv
 dotenv.load_dotenv()
 
@@ -13,29 +16,8 @@ dotenv.load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+agent: Agent
 
-llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-pro",
-        google_api_key=os.getenv("GOOGLE_AI_API_KEY"),
-    )
-
-history_adapter = HistoryAdapter(llm=llm)
-
-class SearchRequest(BaseModel):
-    query: str 
-    user: str
-
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global agent
-    agent = Agent(history_adapter=history_adapter, llm=llm).build_graph()
-    yield
-
-app = FastAPI(lifespan=lifespan)
-
-
-@app.post("/search")
 async def search(request: SearchRequest):
     try:
         res = await agent.ainvoke({
@@ -50,4 +32,31 @@ async def search(request: SearchRequest):
 
     except Exception as e:
         logger.error(f"Error in searching: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=str(e))
+        raise Exception("Error in searching")
+    
+
+async def main():
+    global agent
+
+    connection = await connect_robust(RABBITMQ_URL)
+    channel = await connection.channel()
+    rpc = await RPC.create(channel)
+    await rpc.register(all_queues["search"], search, auto_delete=True)
+
+    llm = ChatGoogleGenerativeAI(
+        model="gemini-1.5-pro",
+        google_api_key=os.getenv("GOOGLE_AI_API_KEY"),
+    )
+    history_adapter = HistoryAdapter(llm=llm)
+    agent = Agent(history_adapter=history_adapter, llm=llm).build_graph()
+
+    logger.info("Processor is running and waiting for requests...")
+
+    try:
+        await asyncio.Future()
+    finally:
+        await connection.close()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

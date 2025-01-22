@@ -1,52 +1,41 @@
-import httpx
 from typing import List, Any, Union
 from typing import Literal
 from categry import *
 from pydantic import BaseModel
 from langgraph.graph.message import AnyMessage
-from config import *
+from aio_pika.patterns import RPC
+from config import all_queues
+
 
 async def query_vectordb(
         collection_name: categories,
         content: str,
         vector: List[float],
         limit: int,
+        rpc: RPC
     ) -> List:
  
-    url = f"http://{vectordb_api_host}:{vectordb_api_port}/retriever/query"
-    
-    payload = {
-        "collection_name": collection_name,
-        "content": content,
-        "vector": vector,
-        "limit": limit
-    }
-    
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    
-    async with httpx.AsyncClient() as client:
-        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
-        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
-        response.raise_for_status()
+    response = await rpc.call(
+        all_queues["vectordb"], 
+        {
+            "method": "query",
+            "data": {
+                "collection_name": collection_name,
+                "vector": vector,
+                "content": content,
+                "limit": limit
+            }
+        })
     
     return response.json().get("query_results")
 
 
-async def vectorize(content: str) -> List[List[float]]:
-    url = f"http://{embedding_api_host}:{embedding_api_port}/vectorize"
-    
-    payload = {"content": [content]}
-
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    
-    async with httpx.AsyncClient() as client:
-        timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
-        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
-        response.raise_for_status()
+async def vectorize(request: List[str], rpc: RPC) -> List[List[float]]:
+    response = await rpc.call(
+        all_queues["embedder"], 
+        {
+            "content": request
+        })
     
     return response.json().get("vectors")
 
@@ -54,7 +43,7 @@ async def vectorize(content: str) -> List[List[float]]:
 def router(
     state: Union[list[AnyMessage], dict[str, Any], BaseModel],
     messages_key: str = "messages",
-) -> Literal["tools", "summarizer"]:
+    ) -> Literal["tools", "summarizer"]:
 
     if isinstance(state, list):
         ai_message = state[-1]

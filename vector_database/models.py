@@ -14,7 +14,7 @@ class AddDocumentRequest(BaseModel):
     metadata: Dict
 
 class QueryRequest(BaseModel):
-    collection_name: List[categry.categories]
+    collection_name: categry.categories
     content: Optional[str]
     vector: List[float]
     limit: int
