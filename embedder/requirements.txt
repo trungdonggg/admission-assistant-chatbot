@@ -1,5 +1,5 @@
 langchain-huggingface==0.0.3
 pydantic==2.10.4
 aio_pika==9.5.4
-typing
 asyncio==3.4.3
+typing

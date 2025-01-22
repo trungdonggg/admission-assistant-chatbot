@@ -1,4 +1,3 @@
-from pydantic import BaseModel, Field
 from typing import List, Optional, Dict
 from knowledge_manager.database import History, Document
 from knowledge_manager.storage import MinioHandler
@@ -10,51 +9,30 @@ import logging
 from knowledge_manager.utils import *
 import categry
 from io import BytesIO
-
+from knowledge_manager.models import *
+from aio_pika import connect_robust
+from aio_pika.patterns import RPC
+from config import RABBITMQ_URL, knowledge_management_api_port
+import uvicorn
+import asyncio
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class DocumentMetadata(BaseModel):
-    name: str = Field(..., description="Name of the file")
-    size: int = Field(..., description="Size of the file in bytes")
-    type: str = Field(..., description="Type of the file")
-    content: str = Field(..., description="Content of the file in text format")
-    owner: str = Field(..., description="Owner of the file")
-    category: List[categry.categories] = Field(..., description="Category of the file")
-    department: str = Field(..., description="Department associated with the file")
-    description: str = Field(..., description="Description of the file")
-    university: str = Field(..., description="University associated with the file")
-    addition: Optional[dict] = Field(None, description="Additional information about the file (if any)")
-    minio: Dict = Field(..., description="Minio return data")
-    url: str = Field(..., description="url to download the file")
 
-    
+doc: Document = None
+history: History = None
+minioClient: MinioHandler = None
+rpc: RPC = None
 
-class AddChatHistoryRequest(BaseModel):
-    user: str = Field(..., description="User name")
-    messages: List = Field(..., description="List of all kind of messages to add to messages")
-    conversation: List = Field(..., description="List of messages of human and assistant")
-    summary: str = Field(..., description="Summary of conversation")
-    
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global doc, history, minioClient
-    doc = Document() 
-    history = History()
-    minioClient = MinioHandler()
-    yield
-
-app = FastAPI(lifespan=lifespan)
-# Define the list of allowed origins
+app = FastAPI()
 origins = [
     "http://localhost:3000",
     "*"  # Allow all origins (use with caution)
 ]
 
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # List of allowed origins
@@ -103,7 +81,7 @@ async def add_document(
         chunks = await split_document(content)
         print('Text chunked')
         
-        vectors = await vectorize(chunks)
+        vectors = await vectorize(chunks, rpc)
         print('Vectors generated')
         
         keys_to_remove = ["content", "size", "type", "owner", "minio", "department", "university"]
@@ -118,7 +96,8 @@ async def add_document(
                 chunks=chunks,
                 vectors=vectors,
                 metadata=data 
-            )
+            ), 
+            rpc
         )
         print('Document added to vector database')
 
@@ -130,7 +109,13 @@ async def add_document(
     except Exception as e:
         minioClient.delete(res['object_name'])
         await doc.delete(file.filename)
-        await remove_document_from_vectordb(category, file.filename)
+        await remove_document_from_vectordb(
+            RemoveDocumentFromVectorDatabaseRequest(
+                document_name=file.filename,
+                collection_name=category
+            ),
+            rpc
+        )
         
         logger.error(f"Error in adding document: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
@@ -164,7 +149,13 @@ async def delete_document(document_name: str) -> Dict:
         print('Document deleted from Minio')
         await doc.delete(document_name)
         print('Document deleted from database')
-        await remove_document_from_vectordb(collection_name, document_name)
+        await remove_document_from_vectordb(
+            RemoveDocumentFromVectorDatabaseRequest(
+                document_name=document_name,
+                collection_name=collection_name
+            ),
+            rpc
+        )
         print('Document deleted from vector database')
         
         return {
@@ -230,3 +221,52 @@ async def delete_history(user: str) -> Dict:
     except Exception as e:
         logger.error(f"Error in deleting history: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+
+
+
+
+
+
+
+
+async def setup_rpc():
+    """Sets up RPC client."""
+    connection = await connect_robust(RABBITMQ_URL)
+    channel = await connection.channel()
+    rpc = await RPC.create(channel)
+    return rpc
+
+async def initialize_resources():
+    """Initialize global resources."""
+    global doc, history, minioClient, rpc
+    try:
+        rpc = await setup_rpc()
+        doc = Document()
+        history = History()
+        minioClient = MinioHandler()
+        logger.info("Resources initialized successfully.")
+    except Exception as e:
+        logger.error(f"Error initializing resources: {str(e)}", exc_info=True)
+        raise RuntimeError("Failed to initialize resources")
+
+async def cleanup_resources():
+    """Clean up global resources."""
+    try:
+        if rpc:
+            await rpc.close()
+            logger.info("RPC connection closed.")
+    except Exception as e:
+        logger.error(f"Error cleaning up resources: {str(e)}", exc_info=True)
+
+def main():
+    """Runs the FastAPI app with Uvicorn."""
+    try:
+        asyncio.run(initialize_resources())
+        uvicorn.run("app:app", host="0.0.0.0", port=knowledge_management_api_port, reload=True)
+    finally:
+        asyncio.run(cleanup_resources())
+
+if __name__ == "__main__":
+    main()

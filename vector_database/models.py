@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional, Literal
 from pydantic import BaseModel
-
+import categry
 
 class GeneralRequest(BaseModel):
     method: Literal["add_document", "query", "remove_document"]
