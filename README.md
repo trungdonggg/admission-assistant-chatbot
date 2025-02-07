@@ -51,16 +51,16 @@ Get a [Google AI Studio API key](https://aistudio.google.com/apikey) and add to 
         sh run.sh
 
 
-#### 3.4 Start knowledge management service:
+#### 3.4 Start knowledge manager service:
 
-    cd knowledge_management
+    cd knowledge_manager
 
-- If you haven't started knowledge management's docker:
+- If you haven't started knowledge manager's docker:
 
         sh startdocker.sh
         sh run.sh
 
-- If you already started knowledge management's docker:
+- If you already started knowledge manager's docker:
 
         sh run.sh
     

@@ -1,5 +1,5 @@
+langchain-huggingface==0.0.3
 pydantic==2.10.4
-weaviate-client==4.7.1
 aio_pika==9.5.4
 asyncio==3.4.3
 typing
