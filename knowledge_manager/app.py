@@ -4,7 +4,6 @@ from knowledge_manager.storage import MinioHandler
 from fastapi import FastAPI, HTTPException, UploadFile, Form, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
-from contextlib import asynccontextmanager
 import logging
 from knowledge_manager.utils import *
 import categry
@@ -12,7 +11,7 @@ from io import BytesIO
 from knowledge_manager.models import *
 from aio_pika import connect_robust
 from aio_pika.patterns import RPC
-from config import RABBITMQ_URL, knowledge_manager_api_port
+from config import rabbitmq_url, knowledge_manager_api_port
 import uvicorn
 import asyncio
 
@@ -233,7 +232,7 @@ async def delete_history(user: str) -> Dict:
 
 async def setup_rpc():
     """Sets up RPC client."""
-    connection = await connect_robust(RABBITMQ_URL)
+    connection = await connect_robust(rabbitmq_url)
     channel = await connection.channel()
     rpc = await RPC.create(channel)
     return rpc

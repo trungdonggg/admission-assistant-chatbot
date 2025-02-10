@@ -8,7 +8,7 @@ import os
 from aio_pika import connect_robust
 from aio_pika.patterns import RPC
 import asyncio
-from config import RABBITMQ_URL, all_queues
+from config import rabbitmq_url, all_queues
 import dotenv
 dotenv.load_dotenv()
 
@@ -39,7 +39,7 @@ async def search(request: SearchRequest):
 async def main():
     global agent
 
-    connection = await connect_robust(RABBITMQ_URL)
+    connection = await connect_robust(rabbitmq_url)
     
     channel_processor = await connection.channel()
     processor_rpc = await RPC.create(channel_processor)
