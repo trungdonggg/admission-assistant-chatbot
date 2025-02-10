@@ -10,8 +10,6 @@ from vector_database.models import *
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
-
 weaviate_db: WeaviateDB = None
 
 async def setup_database():
@@ -34,56 +32,67 @@ async def teardown_database():
         await weaviate_db.close_connection()
 
 
-async def add_document_handler(data: AddDocumentRequest):
+async def add_document_handler(data: Dict) -> Dict:
     """Handler for adding a document."""
     try:
-        for c in data.collection_name:
-            await weaviate_db.add_document(**data.model_dump(), collection_name=c)
+        # Convert dict to AddDocumentRequest model
+        request = AddDocumentRequest(**data)
+        for c in request.collection_name:
+            await weaviate_db.add_document(**request.model_dump(), collection_name=c)
         return {"message": "Document added successfully"}
     except Exception as e:
         logger.error(f"Error in adding document: {str(e)}", exc_info=True)
         # Rollback
-        for c in data.collection_name:
-            await weaviate_db.remove_document(c, data.document_name)
+        try:
+            for c in request.collection_name:
+                await weaviate_db.remove_document(c, data["document_name"])
+        except Exception as cleanup_error:
+            logger.error(f"Error during rollback: {str(cleanup_error)}", exc_info=True)
         raise Exception("Error in adding document")
 
 
-async def query_handler(data: QueryRequest):
+async def query_handler(data: Dict) -> Dict:
     """Handler for querying documents."""
     try:
-        response = await weaviate_db.query(**data.model_dump())
+        request = QueryRequest(**data)
+        response = await weaviate_db.query(**request.model_dump())
         return {"query_results": response}
     except Exception as e:
         logger.error(f"Error in querying: {str(e)}", exc_info=True)
         raise Exception("Error in querying")
 
 
-async def remove_document_handler(data: DeleteDocumentRequest):
+async def remove_document_handler(data: Dict) -> Dict:
     """Handler for removing a document."""
     try:
-        collection_name = data.collection_name
-        document_name = data.document_name
-        for c in collection_name:
-            await weaviate_db.remove_document(c, document_name)
+        request = DeleteDocumentRequest(**data)
+        for c in request.collection_name:
+            await weaviate_db.remove_document(c, request.document_name)
         return {"message": "Document deleted successfully"}
     except Exception as e:
         logger.error(f"Error in deleting document: {str(e)}", exc_info=True)
         raise Exception("Error in deleting document")
 
 
-async def general_handler(request: GeneralRequest):
+async def general_handler(request: Dict) -> Dict:
     """Handler for general RPC calls."""
-    method = request.method
-    data = request.data
-
-    if method == "add_document":
-        return await add_document_handler(data)
-    elif method == "query":
-        return await query_handler(data)
-    elif method == "remove_document":
-        return await remove_document_handler(data)
-    else:
-        raise ValueError(f"Invalid method: {method}")
+    print("received: ", request)
+    try:
+        method = request["method"]
+        data = request["data"]
+        
+        if method == "add_document":
+            return await add_document_handler(data)
+        elif method == "query":
+            return await query_handler(data)
+        elif method == "remove_document":
+            return await remove_document_handler(data)
+        else:
+            raise ValueError(f"Invalid method: {method}")
+            
+    except Exception as e:
+        logger.error(f"Error in general handler: {str(e)}", exc_info=True)
+        raise
 
 
 async def main():
@@ -105,9 +114,11 @@ async def main():
 
     except Exception as e:
         logger.error(f"Error in Vector Database: {str(e)}", exc_info=True)
+        raise
 
     finally:
-        await connection.close()
+        if 'connection' in locals():
+            await connection.close()
         await teardown_database()
 
 

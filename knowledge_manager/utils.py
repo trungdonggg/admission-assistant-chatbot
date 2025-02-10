@@ -1,61 +1,90 @@
 from config import all_queues, textsplitter_api_host, textsplitter_api_port
 import httpx
-from typing import List
+from typing import List, Dict
 from aio_pika.patterns import RPC
 from knowledge_manager.models import *
+import logging
 
+logger = logging.getLogger(__name__)
 
+async def split_document(content: str, rpc: RPC) -> List[str]:
+    """Split document content into chunks using text splitter service."""
+    try:
+        logger.info("Sending text to splitter service")
+        response = await rpc.call(
+            all_queues["textsplitter"],
+            kwargs={"request": content}
+        )
+        
+        chunks = response.get("chunks")
+        logger.info(f"Successfully split text into {len(chunks)} chunks")
+        return chunks
 
-async def split_document(content: str) -> List[str]:
-    url = f"http://{textsplitter_api_host}:{textsplitter_api_port}/splittext"
-    
-    payload = {
-        "text": content,
-    }
-    
-    headers = {
-        'Content-Type': 'application/json'
-    }
+    except httpx.HTTPError as e:
+        logger.error(f"HTTP error in split_document: {str(e)}", exc_info=True)
+        raise Exception(f"Text splitter service error: {str(e)}")
+    except Exception as e:
+        logger.error(f"Error in split_document: {str(e)}", exc_info=True)
+        raise Exception(f"Failed to split document: {str(e)}")
 
-    async with httpx.AsyncClient() as client:
-        timeout = httpx.Timeout(connect=5.0, read=60.0, write=60.0, pool=10.0)
-        response = await client.post(url, headers=headers, json=payload, timeout=timeout)
-        response.raise_for_status()
+async def vectorize(chunks: List[str], rpc: RPC) -> List[List[float]]:
+    """Generate vectors for text chunks using embedder service."""
+    try:
+        logger.info(f"Sending {len(chunks)} chunks to embedder")
+        response = await rpc.call(
+            all_queues["embedder"],
+            kwargs={"request": chunks}
+        )
+        
+        vectors = response.get("vectors")
+        if not vectors:
+            raise Exception("No vectors returned from embedder service")
+            
+        logger.info(f"Successfully generated {len(vectors)} vectors")
+        return vectors
 
-    return response.json().get("chunks")   
+    except Exception as e:
+        logger.error(f"Error in vectorize: {str(e)}", exc_info=True)
+        raise Exception(f"Failed to generate vectors: {str(e)}")
 
+async def add_document_to_vectordb(request: AddDocumentToVectorDatabaseRequest, rpc: RPC) -> Dict:
+    """Add document chunks and vectors to vector database."""
+    try:
+        logger.info(f"Adding document '{request.document_name}' to vector database")
+        response = await rpc.call(
+            all_queues["vectordb"],
+            kwargs={
+                "request": {
+                    "method": "add_document",
+                    "data": request.model_dump()
+                }
+            }
+        )
+        
+        logger.info(f"Successfully added document to vector database")
+        return response
 
+    except Exception as e:
+        logger.error(f"Error in add_document_to_vectordb: {str(e)}", exc_info=True)
+        raise Exception(f"Failed to add document to vector database: {str(e)}")
 
-async def vectorize(request: List[str], rpc: RPC) -> List[List[float]]:
-    response = await rpc.call(
-        all_queues["embedder"], 
-        {
-            "content": request
-        })
-    
-    return response.json().get("vectors")
+async def remove_document_from_vectordb(request: RemoveDocumentFromVectorDatabaseRequest, rpc: RPC) -> Dict:
+    """Remove document from vector database."""
+    try:
+        logger.info(f"Removing document '{request.document_name}' from vector database")
+        response = await rpc.call(
+            all_queues["vectordb"],
+            kwargs={
+                "request": {
+                    "method": "remove_document",
+                    "data": request.model_dump()
+                }
+            }
+        )
+        
+        logger.info(f"Successfully removed document from vector database")
+        return response
 
-
-
-async def add_document_to_vectordb(request: AddDocumentToVectorDatabaseRequest, rpc: RPC):
-    response = await rpc.call(
-        all_queues["vectordb"], 
-        {
-            "method": "add_document",
-            "data": request.model_dump()
-        })
-
-    return response.json()
-
-
-
-
-async def remove_document_from_vectordb(request: RemoveDocumentFromVectorDatabaseRequest, rpc: RPC):
-    response = await rpc.call(
-        all_queues["vectordb"], 
-        {
-            "method": "remove_document",
-            "data": request.model_dump()
-        })
-
-    return response.json()
+    except Exception as e:
+        logger.error(f"Error in remove_document_from_vectordb: {str(e)}", exc_info=True)
+        raise Exception(f"Failed to remove document from vector database: {str(e)}")
