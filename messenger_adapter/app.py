@@ -98,7 +98,6 @@ class EmbedRequest(BaseModel):
 async def test_embedder(request: EmbedRequest):
     """Test endpoint to get embeddings for a list of strings"""
     try:
-        print("request received")
         # Call embedder service through RPC
         embeddings = await rpc.call(
             all_queues["embedder"],
@@ -114,6 +113,31 @@ async def test_embedder(request: EmbedRequest):
         }
     except Exception as e:
         logger.error(f"Error getting embeddings: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+class SplitTextRequest(BaseModel):
+    text: str
+@app.post("/test_splitter")
+async def test_splitter(request: SplitTextRequest):
+    """Test endpoint to split text into chunks"""
+    try:
+        logger.info("Received text splitting request")
+        # Call text splitter service through RPC
+        response = await rpc.call(
+            all_queues["textsplitter"],
+            kwargs={
+                "request": request.text
+            }
+        )
+        
+        return {
+            "status": "success",
+            "text": request.text,
+            "chunks": response
+        }
+    except Exception as e:
+        logger.error(f"Error splitting text: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 def main():
