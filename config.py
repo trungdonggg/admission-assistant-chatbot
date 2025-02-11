@@ -14,20 +14,15 @@ minio_manager_port = 9001
 minio_port=9000
 
 
-textsplitter_api_port=5002
 knowledge_manager_api_port=8000
 messenger_adapter_api_port=7000
 
 
 # variables, these value below can be change for your need.
-server_235 = "192.168.10.235"
-server_226 = "128.214.255.226"
-may_12_labsoe = "192.168.80.125"
 local = "0.0.0.0"
 
 
 knowledge_manager_api_host = local
-textsplitter_api_host = local
 messenger_adapter_api_host = local
 
 

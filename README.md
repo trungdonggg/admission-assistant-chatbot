@@ -1,74 +1,141 @@
-# Admission Assistant Chatbot System
+# Admission Assistant Chatbot
 
-This is a distributed system designed so you can have them working on different server.
+An intelligent chatbot system designed to assist with university admissions inquiries using advanced natural language processing and vector database technology.
 
-### Requirements:
+## 🌟 Features
+
+- Natural language processing for understanding admission-related queries
+- Vector database-powered knowledge retrieval
+- Facebook Messenger integration
+- Modular architecture with microservices
+- Scalable document processing and embedding
+- Containerized deployment support
+
+## 🏗️ Architecture
+
+The project is organized into several key components:
+
+- `embedder/`: Text embedding service
+- `knowledge_manager/`: Knowledge base management system
+- `messenger_adapter/`: Facebook Messenger integration
+- `processor/`: Query processing service
+- `textsplitter/`: Document processing service
+- `vector_database/`: Vector storage and retrieval system
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.11
+- Docker
+- Git
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/trungdonggg/admission-assistant-chatbot
+cd admission-assistant-chatbot
 ```
-python 3.11
-docker installed
+
+2. Set up environment variables:
+```bash
+cp .env.example .env
 ```
 
+3. Get a [Google AI Studio API key](https://aistudio.google.com/apikey) and add it to the `.env` file
 
-## These are the steps to start this system:
+4. Get a [Facebook Page Access Token](https://developers.facebook.com/) and [Page Access Token](https://developers.facebook.com/) and add it to the `.env` file
 
-### 1. Clone the project: 
-    
-    git clone https://github.com/trungdonggg/admission-assistant-chatbot
-    cd admission-assistant-chatbot
+### Deployment
 
-### 2. Config environment
+#### 1. Start RabbitMQ Service
+RabbitMQ should be running on port 5672
+```bash
+docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4.0-management
+```
 
-Make a *.env* file at the root of the project:
-    
-    touch .env
+#### 2. Start Individual Services
 
-Get a [Google AI Studio API key](https://aistudio.google.com/apikey) and add to *.env* file as I did in *.env.example*
+##### Embedding Service
+```bash
+cd embedding
+sh run.sh
+```
 
+##### Text Splitter Service
+```bash
+cd textsplitter
+sh run.sh
+```
 
-### 3. Starting services:
-   
-#### 3.1 Start embedding service:
+##### Vector Database (Weaviate) Service
+```bash
+cd vector_database
+```
+For first-time setup:
+```bash
+sh startdocker.sh
+sh run.sh
+```
+For subsequent runs:
+```bash
+sh run.sh
+```
 
-    cd embedding
-    sh run.sh
+##### Knowledge Manager Service
+```bash
+cd knowledge_manager
+```
+For first-time setup:
+```bash
+sh startdocker.sh
+sh run.sh
+```
+For subsequent runs:
+```bash
+sh run.sh
+```
 
-#### 3.2 Start text splitter service:
+##### Processor Service
+```bash
+cd processor
+sh run.sh
+```
 
-    cd textsplitter
-    sh run.sh
+## 🔧 Services
 
-#### 3.3 Start vector database (weaviate) service:
+### Core Services
+- MongoDB: Document storage (Port: 27017)
+- Weaviate: Vector database (Port: 8080, gRPC: 50051)
+- MinIO: Object storage (Ports: 9000, 9001)
+- RabbitMQ: Message queue (Port: 5672)
 
-    cd vector_database
+### API Services
+- Knowledge Manager API (Port: 8000)
+- Messenger Adapter API (Port: 7000)
 
-- If you haven't started vector database (weaviate) docker:
+## 📚 API Documentation
 
-        sh startdocker.sh
-        sh run.sh
+API documentation can be found in the `API_documents/` directory.
 
-- If you already started vector database (weaviate) docker:
+## 🤝 Contributing
 
-        sh run.sh
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
+## 📄 License
 
-#### 3.4 Start knowledge manager service:
+This project is proprietary software. All rights reserved.
 
-    cd knowledge_manager
+## 👥 Authors
 
-- If you haven't started knowledge manager's docker:
+- [Project Owner]
+- Contributors
 
-        sh startdocker.sh
-        sh run.sh
+## 📞 Support
 
-- If you already started knowledge manager's docker:
-
-        sh run.sh
-    
-
-#### 3.5 Start the processor service:
-
-    cd processor
-    sh run.sh
-
-
-
+For support and queries, please open an issue in the repository.
