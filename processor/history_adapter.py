@@ -1,4 +1,4 @@
-from config import knowledge_management_api_host, knowledge_management_api_port
+from config import knowledge_manager_api_host, knowledge_manager_api_port
 from langchain_core.language_models import BaseChatModel
 from processor.models import State
 import httpx
@@ -10,7 +10,7 @@ class HistoryAdapter:
     
     async def get_chat_history(self, state: State):
         user = state["user"]
-        url = f"http://{knowledge_management_api_host}:{knowledge_management_api_port}/knowledge/history?user={user}"
+        url = f"http://{knowledge_manager_api_host}:{knowledge_manager_api_port}/knowledge/history?user={user}"
         
         async with httpx.AsyncClient() as client:
             timeout = httpx.Timeout(connect=5.0, read=60.0, write=10.0, pool=10.0)
@@ -39,7 +39,7 @@ class HistoryAdapter:
             else:
                 break
         
-        url = f"http://{knowledge_management_api_host}:{knowledge_management_api_port}/knowledge/history"
+        url = f"http://{knowledge_manager_api_host}:{knowledge_manager_api_port}/knowledge/history"
         
         payload = {
             "user": state["user"],

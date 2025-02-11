@@ -178,9 +178,9 @@ async def delete_document(document_name: str) -> Dict:
     try:
         collection_name = (await doc.get_document(document_name))[0]['category']
         minioClient.delete(document_name)
-        print('Document deleted from Minio')
+        logger.info('Document deleted from Minio')
         await doc.delete(document_name)
-        print('Document deleted from database')
+        logger.info('Document deleted from database')
         await remove_document_from_vectordb(
             RemoveDocumentFromVectorDatabaseRequest(
                 document_name=document_name,
