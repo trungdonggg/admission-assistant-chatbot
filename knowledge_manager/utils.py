@@ -1,4 +1,4 @@
-from config import all_queues, textsplitter_api_host, textsplitter_api_port
+from config import all_queues
 import httpx
 from typing import List, Dict
 from aio_pika.patterns import RPC
