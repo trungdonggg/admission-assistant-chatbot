@@ -7,8 +7,40 @@ from processor.models import State
 from processor.history_adapter import HistoryAdapter
 from processor.assistant_interface import Assistant
 from aio_pika.patterns import RPC
-from langchain.tools import Tool
 from processor.defined_tools import *
+from typing import Callable, Awaitable, Any
+
+
+def create_async_search_wrapper(
+    func: Callable[[str, Any, Any], Awaitable[str]], 
+    name: str, 
+    description: str,
+    vdb_rpc: Any,
+    emb_rpc: Any
+) -> Callable[[str], Awaitable[str]]:
+    """Create an async search wrapper with injected RPC clients.
+    
+    Args:
+        func: The async search function to wrap
+        name: Name of the function
+        description: Description of what the function does
+        vdb_rpc: Vector database RPC client
+        emb_rpc: Embedder RPC client
+    """
+    async def wrapper(query: str) -> str:
+        """
+        Args:
+            query: The search query string
+            
+        Returns:
+            Search results as a string
+        """
+        return await func(query, vdb_rpc=vdb_rpc, emb_rpc=emb_rpc)
+    
+    wrapper.__name__ = name
+    wrapper.__doc__ = description
+    return wrapper
+
 
 class Agent:
     def __init__(
@@ -22,149 +54,83 @@ class Agent:
         self.llm = llm
         
         self.query_tools = [
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_truong_dai_hoc(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_truong_dai_hoc",
-                description="""
-                    Search for relevant documents in the 'thong_tin_truong_dai_hoc' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
+            create_async_search_wrapper(
+                search_at_thong_tin_chi_phi,
+                "search_at_thong_tin_chi_phi",
+                "Tìm kiếm thông tin về học phí và chi phí",
+                vdb_rpc,
+                emb_rpc
             ),
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_khoa_cong_nghe_thong_tin(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_khoa_cong_nghe_thong_tin",
-                description="""
-                    Search for relevant documents in the 'thong_tin_khoa_cong_nghe_thong_tin' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
+            create_async_search_wrapper(
+                search_at_thong_tin_truong_dai_hoc,
+                "search_at_thong_tin_truong_dai_hoc",
+                "Tìm kiếm thông tin chung về Đại học Tân Tạo",
+                vdb_rpc,
+                emb_rpc
             ),
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_khoa_ngon_ngu(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_khoa_ngon_ngu",
-                description="""
-                    Search for relevant documents in the 'thong_tin_khoa_ngon_ngu' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
+            create_async_search_wrapper(
+                search_at_thong_tin_khoa_cong_nghe_thong_tin,
+                "search_at_thong_tin_khoa_cong_nghe_thong_tin",
+                "Tìm kiếm thông tin về Khoa Công nghệ Thông tin",
+                vdb_rpc,
+                emb_rpc
             ),
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_khoa_kinh_te(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_khoa_kinh_te",
-                description="""
-                    Search for relevant documents in the 'thong_tin_khoa_kinh_te' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
+            create_async_search_wrapper(
+                search_at_thong_tin_khoa_ngon_ngu,
+                "search_at_thong_tin_khoa_ngon_ngu",
+                "Tìm kiếm thông tin về Khoa Ngôn ngữ",
+                vdb_rpc,
+                emb_rpc
             ),
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_khoa_y(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_khoa_y",
-                description="""
-                    Search for relevant documents in the 'thong_tin_khoa_y' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
+            create_async_search_wrapper(
+                search_at_thong_tin_khoa_kinh_te,
+                "search_at_thong_tin_khoa_kinh_te",
+                "Tìm kiếm thông tin về Khoa Kinh tế",
+                vdb_rpc,
+                emb_rpc
             ),
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_khoa_cong_nghe_sinh_hoc(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_khoa_cong_nghe_sinh_hoc",
-                description="""
-                    Search for relevant documents in the 'thong_tin_khoa_cong_nghe_sinh_hoc' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
+            create_async_search_wrapper(
+                search_at_thong_tin_khoa_y,
+                "search_at_thong_tin_khoa_y",
+                "Tìm kiếm thông tin về Khoa Y",
+                vdb_rpc,
+                emb_rpc
             ),
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_khoa_dieu_duong(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_khoa_dieu_duong",
-                description="""
-                    Search for relevant documents in the 'thong_tin_khoa_dieu_duong' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
+            create_async_search_wrapper(
+                search_at_thong_tin_khoa_cong_nghe_sinh_hoc,
+                "search_at_thong_tin_khoa_cong_nghe_sinh_hoc",
+                "Tìm kiếm thông tin về Khoa Công nghệ Sinh học",
+                vdb_rpc,
+                emb_rpc
             ),
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_khoa_khai_phong(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_khoa_khai_phong",
-                description="""
-                    Search for relevant documents in the 'thong_tin_khoa_khai_phong' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
+            create_async_search_wrapper(
+                search_at_thong_tin_khoa_dieu_duong,
+                "search_at_thong_tin_khoa_dieu_duong",
+                "Tìm kiếm thông tin về Khoa Điều dưỡng",
+                vdb_rpc,
+                emb_rpc
             ),
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_giang_vien(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_giang_vien",
-                description="""
-                    Search for relevant documents in the 'thong_tin_giang_vien' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
+            create_async_search_wrapper(
+                search_at_thong_tin_khoa_khai_phong,
+                "search_at_thong_tin_khoa_khai_phong",
+                "Tìm kiếm thông tin về Khoa Khai Phong",
+                vdb_rpc,
+                emb_rpc
             ),
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_nghien_cuu(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_nghien_cuu",
-                description="""
-                    Search for relevant documents in the 'thong_tin_nghien_cuu' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
+            create_async_search_wrapper(
+                search_at_thong_tin_giang_vien,
+                "search_at_thong_tin_giang_vien",
+                "Tìm kiếm thông tin về giảng viên và giáo sư",
+                vdb_rpc,
+                emb_rpc
             ),
-            Tool.from_function(
-                func=lambda x: search_at_thong_tin_chi_phi(x, vdb_rpc, emb_rpc),
-                name="search_at_thong_tin_chi_phi",
-                description="""
-                    Search for relevant documents in the 'thong_tin_chi_phi' collection using a query string.
-
-                    Args:
-                        query (str): The textual query to search for within the collection.
-
-                    Returns:
-                        str: The search results retrieved from the vector database, containing relevant documents.
-                """,
-            ),
+            create_async_search_wrapper(
+                search_at_thong_tin_nghien_cuu,
+                "search_at_thong_tin_nghien_cuu",
+                "Tìm kiếm thông tin về hoạt động và dự án nghiên cứu",
+                vdb_rpc,
+                emb_rpc
+            )
         ]
 
         

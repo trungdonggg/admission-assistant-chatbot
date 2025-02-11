@@ -71,8 +71,6 @@ async def add_document_handler(data: Dict) -> Dict:
 async def query_handler(data: Dict) -> Dict:
     """Handler for querying documents."""
     try:
-        print(data)
-        
         logger.info("Processing query request")
         logger.debug(f"Query parameters: {data}")
         response = await weaviate_db.query(**data)
