@@ -4,7 +4,6 @@ from knowledge_manager.storage import MinioHandler
 from fastapi import FastAPI, HTTPException, UploadFile, Form, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, StreamingResponse
-from contextlib import asynccontextmanager
 import logging
 from knowledge_manager.utils import *
 import categry
@@ -12,22 +11,52 @@ from io import BytesIO
 from knowledge_manager.models import *
 from aio_pika import connect_robust
 from aio_pika.patterns import RPC
-from config import RABBITMQ_URL, knowledge_manager_api_port
+from config import rabbitmq_url, knowledge_manager_api_port
 import uvicorn
-import asyncio
+from contextlib import asynccontextmanager
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
-
-
+# Global variables
 doc: Document = None
 history: History = None
 minioClient: MinioHandler = None
 rpc: RPC = None
+connection = None
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan context manager for FastAPI app"""
+    global doc, history, minioClient, rpc, connection
+    try:
+        # Startup
+        logger.info("Initializing resources...")
+        connection = await connect_robust(rabbitmq_url)
+        channel = await connection.channel()
+        rpc = await RPC.create(channel)
+        doc = Document()
+        history = History()
+        minioClient = MinioHandler()
+        logger.info("Resources initialized successfully.")
+        yield
+    except Exception as e:
+        logger.error(f"Error during startup: {str(e)}", exc_info=True)
+        raise
+    finally:
+        # Shutdown
+        logger.info("Cleaning up resources...")
+        if rpc:
+            await rpc.close()
+            logger.info("RPC connection closed.")
+        if connection:
+            await connection.close()
+            logger.info("RabbitMQ connection closed.")
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 origins = [
     "http://localhost:3000",
     "*"  # Allow all origins (use with caution)
@@ -57,7 +86,7 @@ async def add_document(
             raise HTTPException(status_code=400, detail="Document already exists")
 
         res = minioClient.upload(file.filename, file.file)
-        print('Document uploaded to Minio')
+        logger.info('Document uploaded to Minio')
 
         data = DocumentMetadata(
                 name=file.filename,
@@ -76,13 +105,13 @@ async def add_document(
         
         await doc.post(data)
         data.pop("_id", None)
-        print('Document added to database')
+        logger.info('Document added to database')
         
-        chunks = await split_document(content)
-        print('Text chunked')
+        chunks = await split_document(content, rpc)
+        logger.info('Text chunked')
         
         vectors = await vectorize(chunks, rpc)
-        print('Vectors generated')
+        logger.info('Vectors generated')
         
         keys_to_remove = ["content", "size", "type", "owner", "minio", "department", "university"]
         for key in keys_to_remove:
@@ -99,7 +128,7 @@ async def add_document(
             ), 
             rpc
         )
-        print('Document added to vector database')
+        logger.info('Document added to vector database')
 
         return {
             "response": "Document added successfully",
@@ -107,16 +136,22 @@ async def add_document(
         }
 
     except Exception as e:
-        minioClient.delete(res['object_name'])
-        await doc.delete(file.filename)
-        await remove_document_from_vectordb(
-            RemoveDocumentFromVectorDatabaseRequest(
-                document_name=file.filename,
-                collection_name=category
-            ),
-            rpc
-        )
-        
+        # Cleanup on failure
+        try:
+            if 'res' in locals():
+                minioClient.delete(res['object_name'])
+            await doc.delete(file.filename)
+            if 'category' in locals():
+                await remove_document_from_vectordb(
+                    RemoveDocumentFromVectorDatabaseRequest(
+                        document_name=file.filename,
+                        collection_name=category
+                    ),
+                    rpc
+                )
+        except Exception as cleanup_error:
+            logger.error(f"Error during cleanup: {str(cleanup_error)}", exc_info=True)
+            
         logger.error(f"Error in adding document: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -146,9 +181,9 @@ async def delete_document(document_name: str) -> Dict:
     try:
         collection_name = (await doc.get_document(document_name))[0]['category']
         minioClient.delete(document_name)
-        print('Document deleted from Minio')
+        logger.info('Document deleted from Minio')
         await doc.delete(document_name)
-        print('Document deleted from database')
+        logger.info('Document deleted from database')
         await remove_document_from_vectordb(
             RemoveDocumentFromVectorDatabaseRequest(
                 document_name=document_name,
@@ -231,43 +266,14 @@ async def delete_history(user: str) -> Dict:
 
 
 
-async def setup_rpc():
-    """Sets up RPC client."""
-    connection = await connect_robust(RABBITMQ_URL)
-    channel = await connection.channel()
-    rpc = await RPC.create(channel)
-    return rpc
-
-async def initialize_resources():
-    """Initialize global resources."""
-    global doc, history, minioClient, rpc
-    try:
-        rpc = await setup_rpc()
-        doc = Document()
-        history = History()
-        minioClient = MinioHandler()
-        logger.info("Resources initialized successfully.")
-    except Exception as e:
-        logger.error(f"Error initializing resources: {str(e)}", exc_info=True)
-        raise Exception("Failed to initialize resources")
-
-async def cleanup_resources():
-    """Clean up global resources."""
-    try:
-        if rpc:
-            await rpc.close()
-            logger.info("RPC connection closed.")
-    except Exception as e:
-        logger.error(f"Error cleaning up resources: {str(e)}", exc_info=True)
-        raise Exception("Failed to clean up resources")
-
 def main():
     """Runs the FastAPI app with Uvicorn."""
-    try:
-        asyncio.run(initialize_resources())
-        uvicorn.run("app:app", host="0.0.0.0", port=knowledge_manager_api_port, reload=True)
-    finally:
-        asyncio.run(cleanup_resources())
+    uvicorn.run(
+        "app:app", 
+        host="0.0.0.0", 
+        port=knowledge_manager_api_port, 
+        reload=True
+    )
 
 if __name__ == "__main__":
     main()

@@ -17,27 +17,28 @@ async def query_vectordb(
  
     response = await rpc.call(
         all_queues["vectordb"], 
-        {
-            "method": "query",
-            "data": {
-                "collection_name": collection_name,
-                "vector": vector,
-                "content": content,
-                "limit": limit
+        kwargs={
+            "request": {
+                "method": "query",
+                "data": {
+                    "collection_name": collection_name,
+                    "vector": vector,
+                    "content": content,
+                    "limit": limit
+                }
             }
         })
-    
-    return response.json().get("query_results")
+    print('response \n', response)
+    return response["query_results"]
 
 
 async def vectorize(request: List[str], rpc: RPC) -> List[List[float]]:
     response = await rpc.call(
-        all_queues["embedder"], 
-        {
-            "content": request
-        })
-    
-    return response.json().get("vectors")
+            all_queues["embedder"],
+            kwargs={"request": request}
+        )
+    print('response \n', response)
+    return response["vectors"]
 
 
 def router(
@@ -57,154 +58,49 @@ def router(
         return "tools"
     return "summarizer"
 
-
-
-
-
 async def search_at_thong_tin_truong_dai_hoc(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_truong_dai_hoc" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_truong_dai_hoc", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
 
 async def search_at_thong_tin_khoa_cong_nghe_thong_tin(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_khoa_cong_nghe_thong_tin" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_khoa_cong_nghe_thong_tin", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
 
 async def search_at_thong_tin_khoa_ngon_ngu(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_khoa_ngon_ngu" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_khoa_ngon_ngu", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
 
 async def search_at_thong_tin_khoa_kinh_te(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_khoa_kinh_te" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_khoa_kinh_te", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
 
 async def search_at_thong_tin_khoa_y(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_khoa_y" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_khoa_y", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
 
 async def search_at_thong_tin_khoa_cong_nghe_sinh_hoc(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_khoa_cong_nghe_sinh_hoc" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_khoa_cong_nghe_sinh_hoc", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
 
 async def search_at_thong_tin_khoa_dieu_duong(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_khoa_dieu_duong" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_khoa_dieu_duong", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
 
 async def search_at_thong_tin_khoa_khai_phong(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_khoa_khai_phong" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_khoa_khai_phong", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
 
 async def search_at_thong_tin_giang_vien(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_giang_vien" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_giang_vien", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
 
 async def search_at_thong_tin_nghien_cuu(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_nghien_cuu" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_nghien_cuu", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
 
 async def search_at_thong_tin_chi_phi(query: str, vdb_rpc: RPC, emb_rpc: RPC) -> str:
-    """
-    Search for relevant documents in the "thong_tin_chi_phi" collection using a query string.
-
-    Args:
-        query (str): The textual query to search for within the collection.
-
-    Returns:
-        str: The search results retrieved from the vector database, containing relevant documents.
-    """
-    vector = await vectorize(query, emb_rpc)
+    vector = await vectorize([query], emb_rpc)
     return await query_vectordb(collection_name="thong_tin_chi_phi", content=query, vector=vector[0], limit=7, rpc=vdb_rpc)
-
-
 
 
 
