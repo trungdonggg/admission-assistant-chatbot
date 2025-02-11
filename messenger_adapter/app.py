@@ -11,7 +11,10 @@ import uvicorn
 import logging
 from contextlib import asynccontextmanager
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 load_dotenv()
 
@@ -138,6 +141,72 @@ async def test_splitter(request: SplitTextRequest):
         }
     except Exception as e:
         logger.error(f"Error splitting text: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+class QueryRequest(BaseModel):
+    user: str
+    query: str
+@app.post("/test_query")
+async def test_query(request: QueryRequest):
+    """Test processor endpoint """
+    try:
+        logger.info("Received query request")
+        # Call processor service through RPC
+        response = await rpc.call(
+            all_queues["processor"],
+            kwargs={
+                "request": {
+                    "user": request.user,
+                    "query": request.query
+                }
+            }
+        )
+        
+        return {
+            "status": "success",
+            "response": response
+        }
+    except Exception as e:
+        logger.error(f"Error splitting text: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+class VectorQueryRequest(BaseModel):
+    collection_name: str
+    query: str
+@app.post("/test_vector_db")
+async def test_vector_db(request: VectorQueryRequest):
+    """Test vector database query endpoint"""
+    try:
+        logger.info("Received request to query vector database")
+        
+        # Call vector database service through RPC
+        embeddings = await rpc.call(
+            all_queues["embedder"],
+            kwargs={
+                "request": [request.query]
+            }
+        )
+        response = await rpc.call(
+            all_queues["vectordb"],
+            kwargs={
+                "request": {
+                    "method": "query",
+                    "data": {
+                        "collection_name": request.collection_name,
+                        "vector": embeddings["vectors"][0],
+                        "content": request.query,
+                        "limit": 5
+                    }
+                }
+            }
+        )
+        
+        return {
+            "status": "success",
+            "query_results": response
+        }
+    except Exception as e:
+        logger.error(f"Error querying vector database: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 def main():

@@ -8,7 +8,10 @@ from config import all_queues, rabbitmq_url
 from vector_database.models import *
 
 # Configure logging with more detailed format
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 weaviate_db: WeaviateDB = None
@@ -68,10 +71,13 @@ async def add_document_handler(data: Dict) -> Dict:
 async def query_handler(data: Dict) -> Dict:
     """Handler for querying documents."""
     try:
+        print(data)
+        
         logger.info("Processing query request")
         logger.debug(f"Query parameters: {data}")
-        response = await weaviate_db.query(data)
+        response = await weaviate_db.query(**data)
         logger.info(f"Query returned {len(response) if response else 0} results")
+        logger.debug(f"Query response: {response}")
         return {"query_results": response}
     except Exception as e:
         logger.error(f"Error in querying: {str(e)}", exc_info=True)

@@ -34,7 +34,7 @@ async def vectorize(chunks: List[str], rpc: RPC) -> List[List[float]]:
         response = await rpc.call(
             all_queues["embedder"],
             kwargs={"request": chunks}
-        )
+        ) 
         
         vectors = response.get("vectors")
         if not vectors:

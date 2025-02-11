@@ -15,7 +15,10 @@ from config import rabbitmq_url, knowledge_manager_api_port
 import uvicorn
 from contextlib import asynccontextmanager
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger(__name__)
 
 # Global variables
