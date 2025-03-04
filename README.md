@@ -111,6 +111,10 @@ sh run.sh
 cd messenger_adapter
 sh run.sh
 ```
+Add ip-address of the machine that run Messenger Adapter to config.py
+
+
+
 ## How to test:
 1. Add docs to database:
 - Check API_doccuments/document_manager.md
