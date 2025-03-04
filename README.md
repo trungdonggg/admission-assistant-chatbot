@@ -54,6 +54,8 @@ RabbitMQ should be running on port 5672
 ```bash
 docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:4.0-management
 ```
+Add ip-address of the machine that run RabbitMQ to config.py
+
 
 #### 2. Start Individual Services
 
@@ -96,12 +98,37 @@ For subsequent runs:
 ```bash
 sh run.sh
 ```
+Add ip-address of the machine that run Knowledge Manager Service to config.py
 
 ##### Processor Service
 ```bash
 cd processor
 sh run.sh
 ```
+
+##### Messenger Adapter
+```bash
+cd messenger_adapter
+sh run.sh
+```
+## How to test:
+1. Add docs to database:
+- Check API_doccuments/document_manager.md
+
+2. Test chatbot: We will test at messenger_adapter endpoint.
+- @app.post("/test_embedder")
+	{content: list[str]}
+
+- @app.post("/test_splitter")
+	{text: str}
+
+- @app.post("/test_query")
+	{
+		user: str
+    	query: str
+    }
+
+- check messenger_adapter/app.py for more...
 
 ## 🔧 Services
 
