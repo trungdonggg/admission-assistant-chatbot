@@ -3,16 +3,6 @@
 ## Overview
 The Knowledge Manager is a service that handles document storage, retrieval, and chat history management. It integrates with MongoDB for metadata storage and MinIO for file storage.
 
-## Dependencies
-```
-pymongo==4.10.1
-pydantic==2.10.4
-fastapi==0.110.0
-uvicorn==0.27.1
-minio==7.2.9
-asyncio==3.4.3
-typing
-```
 
 ## API Endpoints
 
